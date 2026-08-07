@@ -1,0 +1,3 @@
+/home/alisiena/Projects/Compiler/build/CMakeFiles/Compiler.dir
+/home/alisiena/Projects/Compiler/build/CMakeFiles/edit_cache.dir
+/home/alisiena/Projects/Compiler/build/CMakeFiles/rebuild_cache.dir

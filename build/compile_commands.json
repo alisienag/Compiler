@@ -1,0 +1,38 @@
+[
+{
+  "directory": "/home/alisiena/Projects/Compiler/build",
+  "command": "/usr/bin/c++  -I/home/alisiena/Projects/Compiler/include -g -std=c++17 -Wall -Wextra -pedantic -o CMakeFiles/Compiler.dir/src/main.cpp.o -c /home/alisiena/Projects/Compiler/src/main.cpp",
+  "file": "/home/alisiena/Projects/Compiler/src/main.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/main.cpp.o"
+},
+{
+  "directory": "/home/alisiena/Projects/Compiler/build",
+  "command": "/usr/bin/c++  -I/home/alisiena/Projects/Compiler/include -g -std=c++17 -Wall -Wextra -pedantic -o CMakeFiles/Compiler.dir/src/lexer.cpp.o -c /home/alisiena/Projects/Compiler/src/lexer.cpp",
+  "file": "/home/alisiena/Projects/Compiler/src/lexer.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/lexer.cpp.o"
+},
+{
+  "directory": "/home/alisiena/Projects/Compiler/build",
+  "command": "/usr/bin/c++  -I/home/alisiena/Projects/Compiler/include -g -std=c++17 -Wall -Wextra -pedantic -o CMakeFiles/Compiler.dir/src/parser.cpp.o -c /home/alisiena/Projects/Compiler/src/parser.cpp",
+  "file": "/home/alisiena/Projects/Compiler/src/parser.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/parser.cpp.o"
+},
+{
+  "directory": "/home/alisiena/Projects/Compiler/build",
+  "command": "/usr/bin/c++  -I/home/alisiena/Projects/Compiler/include -g -std=c++17 -Wall -Wextra -pedantic -o CMakeFiles/Compiler.dir/src/stringtable.cpp.o -c /home/alisiena/Projects/Compiler/src/stringtable.cpp",
+  "file": "/home/alisiena/Projects/Compiler/src/stringtable.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/stringtable.cpp.o"
+},
+{
+  "directory": "/home/alisiena/Projects/Compiler/build",
+  "command": "/usr/bin/c++  -I/home/alisiena/Projects/Compiler/include -g -std=c++17 -Wall -Wextra -pedantic -o CMakeFiles/Compiler.dir/src/cgen.cpp.o -c /home/alisiena/Projects/Compiler/src/cgen.cpp",
+  "file": "/home/alisiena/Projects/Compiler/src/cgen.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/cgen.cpp.o"
+},
+{
+  "directory": "/home/alisiena/Projects/Compiler/build",
+  "command": "/usr/bin/c++  -I/home/alisiena/Projects/Compiler/include -g -std=c++17 -Wall -Wextra -pedantic -o CMakeFiles/Compiler.dir/src/scopecheck.cpp.o -c /home/alisiena/Projects/Compiler/src/scopecheck.cpp",
+  "file": "/home/alisiena/Projects/Compiler/src/scopecheck.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/scopecheck.cpp.o"
+}
+]

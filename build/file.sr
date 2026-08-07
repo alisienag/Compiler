@@ -1,0 +1,4 @@
+main(): i32 => {
+    let i: i32 = print("hello");
+    ret 20;
+}

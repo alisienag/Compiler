@@ -1,0 +1,1 @@
+cmake .. ; make ; ./Compiler $1 ; gcc output.s -o prog ; ./prog ; echo $?

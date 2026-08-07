@@ -1,0 +1,22 @@
+PROGRAM -> FUNCTION* END
+FUNCTION -> ident '(' PARAMS? ')' ':' type '=' '>' STATEMENT
+PARAMS -> OPERAND (',' OPERAND)*
+OPERAND -> ident: type
+
+STATEMENT -> letStatement | reassignStatement | returnStatement | expressionStatement | blockStatement
+block -> '{' STATEMENT* '}'
+letStatement -> 'let' ident ':' type '=' expression ';'
+reassignStatement -> ident '=' expression ';'
+returnStatement -> 'ret' expression ';'
+expressionStatement -> expression ';'
+
+expression -> term ('+' term | '-' term)*
+term -> number | ident | callExpression | '"' str '"'
+callExpression -> ident '(' ARGS? ')' 
+ARGS -> expression (',' expression)*
+
+
+
+number -> [0-9][0-9]*
+ident -> [a-z | A-Z]+[0-9]*
+type -> 'i32'
