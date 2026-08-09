@@ -1,6 +1,6 @@
 # Example
 
-A simple example of the language:
+A few simple example of the language:
 
 ```rust
 hi(): i32 => {
@@ -25,6 +25,70 @@ The program exits with status code:
 15
 ```
 
+
+```rust
+add(i: i32, j: i32): i32 => ret i + j;
+
+main(): i32 => {
+    let message: string = "hey";
+    print(message, add(1, 1));   
+    ret add(5, 10);
+}
+```
+
+### Output
+
+```
+he
+```
+
+The program exits with status code:
+
+```
+15
+```
+
+
+```rust
+add(i: i32, j: i32): i32 => ret i + j;
+
+main(): i32 => {
+    let message: string = "hey\n";
+    print(message, 4);   
+    {
+        let message: string = "hello\n";
+        print(message, 6);
+    }
+    {
+        print(message, 4);
+        message = "hi\n";
+        print(message, 3);
+    }
+    print(message, 4);
+    ret add(1, 2);
+}
+
+```
+
+### Output
+
+```
+hey
+hello
+hey
+hi
+hi
+```
+
+The program exits with status code:
+
+```
+3
+```
+
+
+
+```
 ---
 
 # Generated x86-64 Assembly (Linux)
@@ -125,21 +189,9 @@ main_done:
 
 - ✅ Functions with return values
 - ✅ Static typing (`i32`)
-- ✅ Variable declarations
+- ✅ Variable declarations (with shadowing)
 - ✅ Function calls
 - ✅ String literals
 - ✅ Built-in `print()` function
 - ✅ Arithmetic expressions
 - ✅ Direct x86-64 Linux code generation (no LLVM)
-
-This example prints:
-
-```
-hello
-```
-
-and exits with status code:
-
-```
-15
-```

@@ -1,8 +1,14 @@
 .intel_syntax noprefix
 .section .data
 string_5:
-.ascii "hey"
+.ascii "hey\n"
 len_5 = . - string_5
+string_7:
+.ascii "hello\n"
+len_7 = . - string_7
+string_8:
+.ascii "hi\n"
+len_8 = . - string_8
 .section .text
 .globl main
 print:
@@ -44,17 +50,45 @@ sub rsp, 16
     pop rax
     mov [rbp-4], rax
     push [rbp-4]
-    push 1
-    push 1
-    call add
-    add rsp, 16
-    push rax
+    push 4
     call print
     add rsp, 16
     push rax
     pop rax
-    push 5
-    push 10
+    lea rax, [rip + string_7]
+    push rax
+    pop rax
+    mov [rbp-12], rax
+    push [rbp-12]
+    push 6
+    call print
+    add rsp, 16
+    push rax
+    pop rax
+    push [rbp-4]
+    push 4
+    call print
+    add rsp, 16
+    push rax
+    pop rax
+    lea rax, [rip + string_8]
+    push rax
+    pop rax
+    mov [rbp-4], rax
+    push [rbp-4]
+    push 3
+    call print
+    add rsp, 16
+    push rax
+    pop rax
+    push [rbp-4]
+    push 4
+    call print
+    add rsp, 16
+    push rax
+    pop rax
+    push 1
+    push 2
     call add
     add rsp, 16
     push rax
