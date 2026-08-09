@@ -26,6 +26,10 @@ int main(int argc, const char** argv) {
     std::cout << "ScopeChecking...\n";
     ScopeCheck scopeCheck(lexer.stringtable_);
     scopeCheck.visit(program);
+    if (scopeCheck.errors) {
+        std::cout << "Got " << scopeCheck.errors << " errors from ScopeCheck! Aborting...\n";
+        exit(EXIT_FAILURE);
+    }
     
     std::cout << "TypeChecking ...\n";
     TypeCheck typeCheck(lexer.stringtable_);

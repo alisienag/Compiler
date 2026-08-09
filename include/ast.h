@@ -12,13 +12,16 @@ struct BlockStatementNode;
 struct ReassignStatementNode;
 struct ReturnStatementNode;
 struct ExpressionStatementNode;
+struct IfStatementNode;
 
 struct ExpressionNode;
 struct BinaryExpressionNode;
 struct TermExpressionNode;
 struct CallExpressionNode;
 
-enum class Type { Unknown, i32, String };
+enum class Type { Unknown, i32, String, Bool };
+
+enum class BinOp { Add, Sub, Mul, Div, Eq, Ne, Lt, Gt, Le, Ge };
 
 class Visitor {
     public:
@@ -32,6 +35,7 @@ class Visitor {
     virtual Type visit(ReassignStatementNode&) = 0;
     virtual Type visit(ReturnStatementNode&) = 0;
     virtual Type visit(ExpressionStatementNode&) = 0;
+    virtual Type visit(IfStatementNode&) = 0;
 
     virtual Type visit(TermExpressionNode&) = 0;
     virtual Type visit(BinaryExpressionNode&) = 0;
@@ -42,6 +46,22 @@ class Visitor {
             case Type::i32:     return "i32";
             case Type::Unknown: return "unknown";
             case Type::String:  return "string";
+            case Type::Bool: return "bool";
+        }
+        return "?";
+    }
+    static const char* opName(BinOp t) {
+        switch (t) {
+            case BinOp::Add: return "+";
+            case BinOp::Sub: return "-";
+            case BinOp::Mul: return "*";
+            case BinOp::Div: return "/";
+            case BinOp::Eq: return "==";
+            case BinOp::Ne: return "!=";
+            case BinOp::Lt: return "<";
+            case BinOp::Gt: return ">";
+            case BinOp::Le: return "<=";
+            case BinOp::Ge: return ">=";
         }
         return "?";
     }
@@ -86,8 +106,18 @@ struct ExpressionStatementNode : StatementNode {
     Type accept(Visitor& v) override { return v.visit(*this); }
 };
 
+struct IfStatementNode : StatementNode {
+    std::unique_ptr<ExpressionNode> cond;
+    std::unique_ptr<BlockStatementNode> ifNode;
+    std::unique_ptr<StatementNode> elseNode;
+    bool hasElse;
+    IfStatementNode(std::unique_ptr<ExpressionNode> cond, std::unique_ptr<BlockStatementNode> ifNode, std::unique_ptr<StatementNode> elseNode, bool hasElse) : cond(std::move(cond)), ifNode(std::move(ifNode)), elseNode(std::move(elseNode)), hasElse(hasElse) {}
+    Type accept(Visitor& v) override { return v.visit(*this); }
+};
+
 struct ExpressionNode {
     Type inferredType = Type::Unknown;
+    ExpressionNode(Type t) : inferredType(t) {}
     virtual ~ExpressionNode() = default;
     virtual Type accept(Visitor&) = 0;
 };
@@ -96,21 +126,21 @@ struct TermExpressionNode : ExpressionNode {
     int value;
     Type type;
     bool isIdent;
-    explicit TermExpressionNode(int v, bool isIdent, Type t) : value(v), type(t), isIdent(isIdent)  {}
+    explicit TermExpressionNode(int v, bool isIdent, Type t) : ExpressionNode(t), value(v), type(t), isIdent(isIdent) {}
     Type accept(Visitor& v) override { return v.visit(*this); }
 };
 
 struct BinaryExpressionNode : ExpressionNode {
     std::unique_ptr<ExpressionNode> l;
     std::unique_ptr<ExpressionNode> r;
-    char op;
-    BinaryExpressionNode(std::unique_ptr<ExpressionNode> l, char op, std::unique_ptr<ExpressionNode> r) : l(std::move(l)), op(op), r(std::move(r)) { }
+    BinOp op;
+    BinaryExpressionNode(std::unique_ptr<ExpressionNode> l, BinOp op, std::unique_ptr<ExpressionNode> r) : ExpressionNode(Type::Unknown), l(std::move(l)), op(op), r(std::move(r)) { }
     Type accept(Visitor& v) override { return v.visit(*this); }
 };
 
 struct CallExpressionNode : TermExpressionNode {
-    std::vector<std::unique_ptr<TermExpressionNode>> operands;
-    CallExpressionNode(int v, bool isIdent, std::vector<std::unique_ptr<TermExpressionNode>> operands, Type t) : TermExpressionNode(v, isIdent, t), operands(std::move(operands)) {}
+    std::vector<std::unique_ptr<ExpressionNode>> operands;
+    CallExpressionNode(int v, bool isIdent, std::vector<std::unique_ptr<ExpressionNode>> operands, Type t) : TermExpressionNode(v, isIdent, t), operands(std::move(operands)) {}
     Type accept(Visitor& v) override { return v.visit(*this); }
 };
 

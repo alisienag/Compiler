@@ -6,12 +6,12 @@
 
 class Parser {
     public:
-        explicit Parser(std::vector<Token> tokens, StringTable table);
+        explicit Parser(std::vector<Token> tokens, StringTable& table);
         ProgramNode parse();
     private:
         std::vector<Token> tokens_;
         std::size_t pos_;
-        StringTable table_;
+        StringTable& table_;
         const Token& peek() const;
         const Token& peek(int idx) const;
         const Token& advance();
@@ -32,8 +32,11 @@ class Parser {
         std::unique_ptr<BlockStatementNode> blockStatement();
         std::unique_ptr<ReassignStatementNode> reassignStatement();
         std::unique_ptr<ReturnStatementNode> returnStatement();
+        std::unique_ptr<IfStatementNode> ifStatement();
 
         std::unique_ptr<ExpressionNode> expression();
+        std::unique_ptr<ExpressionNode> comparisonExpression();
+        std::unique_ptr<ExpressionNode> additiveExpression();
         std::unique_ptr<TermExpressionNode> termExpression();
         std::unique_ptr<BinaryExpressionNode> binaryExpression(std::unique_ptr<TermExpressionNode> l);
         std::unique_ptr<CallExpressionNode> callExpression(const Token& tok);

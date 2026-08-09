@@ -68,8 +68,19 @@ public:
         return Type::Unknown;
     }
 
+    Type visit(IfStatementNode& s) override {
+        std::cout << "if\n";
+        s.cond->accept(*this);
+        depth_++;
+        s.ifNode->accept(*this);
+        if (s.hasElse)
+            s.elseNode->accept(*this);
+        depth_--;
+        return Type::Unknown;
+    }
+
     Type visit(BinaryExpressionNode& e) override {
-        indent(); std::cout << e.op << std::endl;
+        indent(); std::cout << opName(e.op) << std::endl;
         depth_++;
         e.l->accept(*this);
         e.r->accept(*this);

@@ -16,14 +16,17 @@ class ScopeCheck : Visitor {
     Type visit(ReassignStatementNode&) override;
     Type visit(ReturnStatementNode&) override;
     Type visit(ExpressionStatementNode&) override;
+    Type visit(IfStatementNode&) override;
 
     Type visit(BinaryExpressionNode&) override;
     Type visit(TermExpressionNode&) override;
     Type visit(CallExpressionNode&) override;
+    
+    unsigned int errors;
     private:
     std::vector<std::vector<int>> scopes_;
     unsigned int initCounter_;
-    StringTable table_;
+    StringTable& table_;
 
     bool existsInCurrentScope(int idx);
     bool existsAtAll(int idx);

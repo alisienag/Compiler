@@ -6,12 +6,12 @@
 #include <iostream>
 #include <utility>
 
-Parser::Parser(std::vector<Token> tokens, StringTable table) : tokens_(std::move(tokens)), pos_(0),  table_(table){}
+Parser::Parser(std::vector<Token> tokens, StringTable& table) : tokens_(std::move(tokens)), pos_(0),  table_(table){}
 
 
 ProgramNode Parser::parse() {
     ProgramNode program;
-    std::unique_ptr<ExpressionStatementNode> stmt = std::make_unique<ExpressionStatementNode>(std::make_unique<TermExpressionNode>(1, false, Type::i32));
+    std::unique_ptr<ReturnStatementNode> stmt = std::make_unique<ReturnStatementNode>(std::make_unique<TermExpressionNode>(1, false, Type::i32));
         
     std::unique_ptr<OperandNode> op = std::make_unique<OperandNode>(table_.addString("input"), Type::String);
     std::unique_ptr<OperandNode> op2 = std::make_unique<OperandNode>(table_.addString("length"), Type::i32);
@@ -65,6 +65,9 @@ std::unique_ptr<StatementNode> Parser::statement() {
     if (check(TokenType::Ret)) {
         return returnStatement();
     }
+    if (check(TokenType::If)) {
+        return ifStatement();
+    }
     std::unique_ptr<ExpressionNode> e = expression();
     expect(TokenType::SColon, ";");
     return std::make_unique<ExpressionStatementNode>(std::move(e)); // worse case, just expect an expression
@@ -106,10 +109,43 @@ std::unique_ptr<ReturnStatementNode> Parser::returnStatement() {
     return std::make_unique<ReturnStatementNode>(std::move(e));
 }
 
+std::unique_ptr<IfStatementNode> Parser::ifStatement() {
+    expect(TokenType::If, "if");
+    std::unique_ptr<ExpressionNode> expr = expression();
+    std::unique_ptr<BlockStatementNode> ifBlock = blockStatement();
+    if (check(TokenType::Else)) {
+        expect(TokenType::Else, "else");
+        if (check(TokenType::LCurly)) {
+            std::unique_ptr<StatementNode> elseBlock = statement();
+            return std::make_unique<IfStatementNode>(std::move(expr), std::move(ifBlock), std::move(elseBlock), true);
+        } else {
+            std::unique_ptr<StatementNode> elseBlock = ifStatement();
+            return std::make_unique<IfStatementNode>(std::move(expr), std::move(ifBlock), std::move(elseBlock), true);
+        }
+    }
+    return std::make_unique<IfStatementNode>(std::move(expr), std::move(ifBlock), nullptr, false);
+}
+
 std::unique_ptr<ExpressionNode> Parser::expression() {
+    return comparisonExpression();
+}
+
+std::unique_ptr<ExpressionNode> Parser::comparisonExpression() {
+    std::unique_ptr<ExpressionNode> lhs = additiveExpression();
+    if (check(TokenType::Equal)) {
+        expect(TokenType::Equal, "==");
+        expect(TokenType::Equals, "==");
+        std::cout << "EQuals detected with next token: " << (int)peek(0).type << "\n";
+        return std::make_unique<BinaryExpressionNode>(std::move(lhs), BinOp::Eq, additiveExpression());
+    }
+
+    return lhs;
+}
+
+std::unique_ptr<ExpressionNode> Parser::additiveExpression() {
     std::unique_ptr<ExpressionNode> lhs = termExpression();
     while (check(TokenType::Plus) || check(TokenType::Minus)) {
-        char op = check(TokenType::Plus) ? '+' : '-';
+        BinOp op = check(TokenType::Plus) ? BinOp::Add : BinOp::Sub;
         advance();
         lhs = std::make_unique<BinaryExpressionNode>(std::move(lhs), op, termExpression());
     }
@@ -136,17 +172,25 @@ std::unique_ptr<TermExpressionNode> Parser::termExpression() {
         expect(TokenType::Speech, "\"");
         return expr;
     }
+    if (check(TokenType::True)) {
+        Token tok = expect(TokenType::True, "true");
+        return std::make_unique<TermExpressionNode>(tok.value, false, Type::Bool);
+    }
+    if (check(TokenType::False)) {
+        Token tok = expect(TokenType::False, "false");
+        return std::make_unique<TermExpressionNode>(tok.value, false, Type::Bool);
+    }
     std::cerr << "Parse Error: expected number or identifier at line: " << peek().line << "!\n";
     exit(EXIT_FAILURE);
 }
 
 std::unique_ptr<CallExpressionNode> Parser::callExpression(const Token& tok) {
     expect(TokenType::LParen, "(");
-    std::vector<std::unique_ptr<TermExpressionNode>> operands;
+    std::vector<std::unique_ptr<ExpressionNode>> operands;
     if (!check(TokenType::RParen)) {
-        operands.push_back(termExpression());
+        operands.push_back(expression());
         while (match(TokenType::Comma))
-            operands.push_back(termExpression());
+            operands.push_back(expression());
     }
     expect(TokenType::RParen, ")");
     return std::make_unique<CallExpressionNode>(tok.value, true, std::move(operands), Type::Unknown);
@@ -192,6 +236,7 @@ const Token& Parser::expect(TokenType type, const char* what) {
 Type Parser::expectType() {
     if (match(TokenType::i32)) return Type::i32;
     if (match(TokenType::String)) return Type::String;
+    if (match(TokenType::Bool)) return Type::Bool;
     std::cerr << "Parse Error: Expected type at line " << peek().line << "!\n";
     exit(EXIT_FAILURE);
 }

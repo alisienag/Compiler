@@ -37,7 +37,7 @@ std::string Cgen::generate(ProgramNode& program) {
     data << ".section .data\n";
     //STRINGS
     assembly_ << ".section .text\n";
-    assembly_ << ".globl main\n";
+    assembly_ << ".globl _start\n";
     for (auto& f : program.functions) {
         f->accept(*this);
     }
@@ -62,7 +62,6 @@ Type Cgen::visit(FunctionNode& p) {
         emitPrint();
         return Type::Unknown;
     }
-
     std::size_t opCount = p.operands.size();
     int baseIdx = (8 * opCount) + 8; // for first
     for (auto& e : p.operands) {
@@ -73,7 +72,7 @@ Type Cgen::visit(FunctionNode& p) {
             exit(EXIT_FAILURE);
         }
     }
-    emitLabel(currentFunction);
+    emitLabel("_" + currentFunction);
     emitPush(R_RBP);
     emitMov(R_RBP, R_RSP);
     assembly_ << "sub rsp, " << align16((8 * p.localCount)) << "\n"; // fix for number of locals
@@ -122,7 +121,7 @@ Type Cgen::visit(ReturnStatementNode& s) {
     hasReturn = true;
     s.expr->accept(*this);
     emitPop(R_RAX);
-    if (currentFunction.compare("main") == 0) {
+    if (currentFunction.compare("start") == 0) {
         emitMov(R_RDI, R_RAX);
         emitMov(R_RAX, SYS_EXIT);
         emitSyscall();
@@ -138,15 +137,37 @@ Type Cgen::visit(ExpressionStatementNode& s) {
     return Type::Unknown;
 }
 
+Type Cgen::visit(IfStatementNode& s) {
+    s.cond->accept(*this);
+    emitPop(R_RAX);
+    std::string else_start = getFreshLabel();
+    std::string else_end = getFreshLabel();
+    emitCmp(R_RAX, "0");
+    emitJe(else_start);
+    s.ifNode->accept(*this);
+    emitJmp(else_end);
+    emitLabel(else_start);
+    if (s.hasElse) {
+        s.elseNode->accept(*this);
+    }
+    emitLabel(else_end);
+    
+    return Type::Unknown;
+}
+
 Type Cgen::visit(BinaryExpressionNode& e) {
     e.l->accept(*this);
     e.r->accept(*this);
     emitPop(R_RBX);
     emitPop(R_RAX);
-    if (e.op == '+') {
+    if (e.op == BinOp::Add) {
         emitLine("add rax, rbx");
-    } else if (e.op == '-') {
+    } else if (e.op == BinOp::Sub) {
         emitLine("sub rax, rbx");
+    } else if (e.op == BinOp::Eq) {
+        emitCmp(R_RAX, R_RBX);
+        emitLine("sete al");
+        emitLine("movzx rax, al");
     } else {
         std::cerr << "Cgen Error: Error finding op for binary operation!\n";
     }
@@ -177,23 +198,40 @@ Type Cgen::visit(TermExpressionNode& e) {
 }
 
 Type Cgen::visit(CallExpressionNode& e) {
-    int argSlots = 0;
-    for (auto& op : e.operands) {
-        op->accept(*this); // top of the stack
-        if (op->type == Type::String) { // temp fix, proper fix later
-            argSlots++;
+    int stackSlots = 0;
+    for (std::size_t i = 0; i < e.operands.size(); i++) {
+        const std::unique_ptr<ExpressionNode>& term = e.operands.at(i);
+        if (term->inferredType == Type::i32 || term->inferredType == Type::String) {
+            stackSlots += 1;
+        } else {
+            // Handle future types, structs etc
         }
-        argSlots++;
+    }
+    int padding = ((stackDepth + stackSlots) % 2 == 0 ? 0 : 1);
+    if (padding) {
+        emitLine("sub rsp, 8");
+        stackDepth++;
+    }
+    int before = stackDepth;
+    for (auto& op : e.operands)
+        op->accept(*this);
+    int slotsTaken = stackDepth - before;
+    if (slotsTaken != stackSlots) {
+        std::cerr << "Cgen Warning: Slots Taken not equal to calculated stack slots!\n";
     }
     emitCall(e.value);
-    if (argSlots > 0)
-        emitLine("add rsp, " + std::to_string((8*argSlots)));
+
+    int cleanUp = slotsTaken + padding;
+    if (cleanUp > 0) {
+        emitLine("add rsp, " + std::to_string(8*cleanUp));
+        stackDepth -= cleanUp;
+    }
     emitPush(R_RAX);
     return Type::Unknown;
 }
 
 void Cgen::emitPrint() {
-    emitLabel("print");
+    emitLabel("_print");
     emitPush(R_RBP);
     emitMov(R_RBP, R_RSP);
     emitMov(R_RAX, "1");
@@ -205,8 +243,4 @@ void Cgen::emitPrint() {
     emitMov(R_RSP, R_RBP);
     emitPop(R_RBP);
     emitLine("ret");
-}
-
-Cgen::Cgen(StringTable table) {
-    this->table_ = table;
 }

@@ -1,17 +1,11 @@
 .intel_syntax noprefix
 .section .data
-string_5:
-.ascii "hey\n"
-len_5 = . - string_5
-string_7:
-.ascii "hello\n"
-len_7 = . - string_7
-string_8:
-.ascii "hi\n"
-len_8 = . - string_8
+string_6:
+.ascii "go\n"
+len_6 = . - string_6
 .section .text
-.globl main
-print:
+.globl _start
+_print:
     push rbp
     mov rbp, rsp
     mov rax, 1
@@ -23,7 +17,7 @@ print:
     mov rsp, rbp
     pop rbp
     ret
-add:
+_add:
     push rbp
     mov rbp, rsp
 sub rsp, 0
@@ -40,63 +34,52 @@ add_done:
     mov rsp, rbp
     pop rbp
     ret
-main:
+_start:
     push rbp
     mov rbp, rsp
 sub rsp, 16
     mov eax, 0
-    lea rax, [rip + string_5]
-    push rax
-    pop rax
-    mov [rbp-4], rax
-    push [rbp-4]
-    push 4
-    call print
-    add rsp, 16
-    push rax
-    pop rax
-    lea rax, [rip + string_7]
-    push rax
-    pop rax
-    mov [rbp-12], rax
-    push [rbp-12]
-    push 6
-    call print
-    add rsp, 16
-    push rax
-    pop rax
-    push [rbp-4]
-    push 4
-    call print
-    add rsp, 16
-    push rax
-    pop rax
-    lea rax, [rip + string_8]
-    push rax
-    pop rax
-    mov [rbp-4], rax
-    push [rbp-4]
-    push 3
-    call print
-    add rsp, 16
-    push rax
-    pop rax
-    push [rbp-4]
-    push 4
-    call print
-    add rsp, 16
-    push rax
-    pop rax
+    sub rsp, 8
     push 1
+    push 1
+    call _add
+    add rsp, 24
+    push rax
     push 2
-    call add
-    add rsp, 16
+    pop rbx
+    pop rax
+    cmp rax, rbx
+    sete al
+    movzx rax, al
+    push rax
+    pop rax
+    mov [rbp-4], rax
+    push [rbp-4]
+    pop rax
+    cmp rax, 0
+    je label_0
+    sub rsp, 8
+    lea rax, [rip + string_6]
+    push rax
+    push 3
+    call _print
+    add rsp, 24
+    push rax
+    pop rax
+    jmp label_1
+label_0:
+label_1:
+    sub rsp, 8
+    push 5
+    push 10
+    call _add
+    add rsp, 24
     push rax
     pop rax
     mov rdi, rax
     mov rax, 60
     syscall
-main_done:
+start_done:
     mov rsp, rbp
     pop rbp
     ret

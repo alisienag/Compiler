@@ -1,17 +1,9 @@
 add(i: i32, j: i32): i32 => ret i + j;
 
-main(): i32 => {
-    let message: string = "hey\n";
-    print(message, 4);   
-    {
-        let message: string = "hello\n";
-        print(message, 6);
+start(): i32 => {
+    let ready: bool = add(1, 1) == 2;
+    if ready {
+        print("go\n", 3);
     }
-    {
-        print(message, 4);
-        message = "hi\n";
-        print(message, 3);
-    }
-    print(message, 4);
-    ret add(1, 2);
+    ret add(5, 10);
 }

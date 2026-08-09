@@ -117,6 +117,18 @@ Token matchKeyword(const std::string& word) {
     } else if (word.compare("string") == 0) {
         token.type = TokenType::String;
         return token;
+    } else if (word.compare("true") == 0) {
+        token.type = TokenType::True;
+        token.value = 1;
+    } else if (word.compare("false") == 0) {
+        token.type = TokenType::False;
+        token.value = 0;
+    } else if (word.compare("bool") == 0) {
+        token.type = TokenType::Bool;
+    } else if (word.compare("if") == 0) {
+        token.type = TokenType::If;
+    } else if (word.compare("else") == 0) {
+        token.type = TokenType::Else;
     }
     return token;
 }
@@ -148,6 +160,10 @@ Token matchSymbol(const char first, const char second) {
         token.type = TokenType::Colon;
         return token;
     } else if (first == '=') {
+        if (second == '=') {
+            token.type = TokenType::Equal;
+            return token;
+        }
         token.type = TokenType::Equals;
         return token;
     } else if (first == ';') {
@@ -164,6 +180,10 @@ Token matchSymbol(const char first, const char second) {
         token.type = TokenType::Comma;
     } else if (first == '\"') {
         token.type = TokenType::Speech;
+    } else if (first == '!') {
+        if (second == '=') {
+            token.type = TokenType::NEqual;
+        }
     }
     return token;
 }

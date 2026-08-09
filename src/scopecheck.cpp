@@ -28,6 +28,7 @@ Type ScopeCheck::visit(FunctionNode& p) {
 Type ScopeCheck::visit(OperandNode& o) {
     if (existsInCurrentScope(o.identIdx)) {
         std::cerr << "ScopeCheck Error: cannot redeclare operand " << table_.findStringByIdx(o.identIdx) << "\n";
+        errors++;
     }
     scopes_.back().push_back(o.identIdx);
     return Type::Unknown;
@@ -37,6 +38,7 @@ Type ScopeCheck::visit(LetStatementNode& s) {
     unsigned int currentIdx = s.idx;
     if (std::find(scopes_.back().begin(), scopes_.back().end(), currentIdx) != scopes_.back().end()) {
         std::cerr << "Scopechecking Error: Cannot redeclare variable " << table_.findStringByIdx(currentIdx) << "\n";
+        errors++;
     } else {
         scopes_.back().push_back(currentIdx);
         initCounter_++;
@@ -55,6 +57,7 @@ Type ScopeCheck::visit(BlockStatementNode& s) {
 Type ScopeCheck::visit(ReassignStatementNode& s) {
     if (!existsAtAll(s.idx)) {
         std::cerr << "ScopeCheck: identifier " << table_.findStringByIdx(s.idx) << " not defined to reassign!\n";
+        errors++;
     }
     s.expr->accept(*this);
     return Type::Unknown;
@@ -70,6 +73,19 @@ Type ScopeCheck::visit(ExpressionStatementNode& s) {
     return Type::Unknown;
 }
 
+Type ScopeCheck::visit(IfStatementNode& s) {
+    s.cond->accept(*this);
+    scopes_.push_back(std::vector<int>());
+    s.ifNode->accept(*this);
+    scopes_.pop_back();
+    if (s.hasElse) {
+        scopes_.push_back(std::vector<int>());
+        s.elseNode->accept(*this);
+        scopes_.pop_back();
+    }
+    return Type::Unknown;
+}
+
 Type ScopeCheck::visit(BinaryExpressionNode& e) {
     e.l->accept(*this);
     e.r->accept(*this);
@@ -80,6 +96,7 @@ Type ScopeCheck::visit(TermExpressionNode& e) {
     if (e.isIdent) {
         if (!existsAtAll(e.value)) {
             std::cerr << "ScopeCheck Error: identifier " << table_.findStringByIdx(e.value) << " not defined to use!\n";
+            errors++;
         }
     }
     return Type::Unknown;
@@ -88,6 +105,7 @@ Type ScopeCheck::visit(TermExpressionNode& e) {
 Type ScopeCheck::visit(CallExpressionNode& e) {
     if (!existsAtAll(e.value)) {
         std::cerr << "ScopeCheck Error: cannot find function " << e.value << "\n";
+        errors++;
     }
     return Type::Unknown;
 }
