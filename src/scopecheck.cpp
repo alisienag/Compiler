@@ -3,15 +3,16 @@
 #include <algorithm>
 #include <iostream>
 
-void ScopeCheck::visit(ProgramNode& p) {
+Type ScopeCheck::visit(ProgramNode& p) {
     scopes_.push_back(std::vector<int>());
     for (auto & funcs : p.functions)
         scopes_.back().push_back(funcs->nameIdx);
     for (auto& funcs : p.functions) {
         funcs->accept(*this);
     }
+    return Type::Unknown;
 }
-void ScopeCheck::visit(FunctionNode& p) {
+Type ScopeCheck::visit(FunctionNode& p) {
     initCounter_ = 0;
     scopes_.push_back({});
     scopes_.back().push_back(p.nameIdx);
@@ -21,16 +22,18 @@ void ScopeCheck::visit(FunctionNode& p) {
     p.statement->accept(*this);
     scopes_.pop_back();
     p.localCount = initCounter_;
+    return Type::Unknown;
 }
 
-void ScopeCheck::visit(OperandNode& o) {
+Type ScopeCheck::visit(OperandNode& o) {
     if (existsInCurrentScope(o.identIdx)) {
         std::cerr << "ScopeCheck Error: cannot redeclare operand " << table_.findStringByIdx(o.identIdx) << "\n";
     }
     scopes_.back().push_back(o.identIdx);
+    return Type::Unknown;
 }
 
-void ScopeCheck::visit(LetStatementNode& s) {
+Type ScopeCheck::visit(LetStatementNode& s) {
     unsigned int currentIdx = s.idx;
     if (std::find(scopes_.back().begin(), scopes_.back().end(), currentIdx) != scopes_.back().end()) {
         std::cerr << "Scopechecking Error: Cannot redeclare variable " << table_.findStringByIdx(currentIdx) << "\n";
@@ -38,47 +41,55 @@ void ScopeCheck::visit(LetStatementNode& s) {
         scopes_.back().push_back(currentIdx);
         initCounter_++;
     }
+    return Type::Unknown;
 }
-void ScopeCheck::visit(BlockStatementNode& s) {
+Type ScopeCheck::visit(BlockStatementNode& s) {
     scopes_.push_back(std::vector<int>());
     for (auto& stmt : s.statements) {
         stmt->accept(*this);
     }
     scopes_.pop_back();
+    return Type::Unknown;
 }
 
-void ScopeCheck::visit(ReassignStatementNode& s) {
+Type ScopeCheck::visit(ReassignStatementNode& s) {
     if (!existsAtAll(s.idx)) {
         std::cerr << "ScopeCheck: identifier " << table_.findStringByIdx(s.idx) << " not defined to reassign!\n";
     }
     s.expr->accept(*this);
+    return Type::Unknown;
 }
 
-void ScopeCheck::visit(ReturnStatementNode& s) {
+Type ScopeCheck::visit(ReturnStatementNode& s) {
     s.expr->accept(*this);
+    return Type::Unknown;
 }
 
-void ScopeCheck::visit(ExpressionStatementNode& s) {
+Type ScopeCheck::visit(ExpressionStatementNode& s) {
     s.expr->accept(*this);
+    return Type::Unknown;
 }
 
-void ScopeCheck::visit(BinaryExpressionNode& e) {
+Type ScopeCheck::visit(BinaryExpressionNode& e) {
     e.l->accept(*this);
     e.r->accept(*this);
+    return Type::Unknown;
 }
 
-void ScopeCheck::visit(TermExpressionNode& e) {
+Type ScopeCheck::visit(TermExpressionNode& e) {
     if (e.isIdent) {
         if (!existsAtAll(e.value)) {
             std::cerr << "ScopeCheck Error: identifier " << table_.findStringByIdx(e.value) << " not defined to use!\n";
         }
     }
+    return Type::Unknown;
 }
 
-void ScopeCheck::visit(CallExpressionNode& e) {
+Type ScopeCheck::visit(CallExpressionNode& e) {
     if (!existsAtAll(e.value)) {
         std::cerr << "ScopeCheck Error: cannot find function " << e.value << "\n";
     }
+    return Type::Unknown;
 }
 
 bool ScopeCheck::existsInCurrentScope(int idx) {

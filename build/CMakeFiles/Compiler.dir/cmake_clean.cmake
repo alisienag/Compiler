@@ -12,6 +12,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/Compiler.dir/src/scopecheck.cpp.o.d"
   "CMakeFiles/Compiler.dir/src/stringtable.cpp.o"
   "CMakeFiles/Compiler.dir/src/stringtable.cpp.o.d"
+  "CMakeFiles/Compiler.dir/src/typecheck.cpp.o"
+  "CMakeFiles/Compiler.dir/src/typecheck.cpp.o.d"
   "Compiler"
   "Compiler.pdb"
 )

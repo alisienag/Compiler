@@ -1,11 +1,22 @@
 #include "cgen.h"
 #include "ast.h"
 #include <iostream>
+#include <algorithm>
 
 #define align16(n) ( (n + 15) & ~15 )
 
 std::string Cgen::getLocalLocation(int idx) {
-    int index = localIndex_[idx];
+    int index = 1; // this should never be positive
+    int scope = currentScope;
+    while (scope >= 0) {
+        if(localIndex_.find(scope) != localIndex_.end()) {
+            if (localIndex_[scope].find(idx) != localIndex_[scope].end()) {
+                index = localIndex_[scope][idx];
+                break;
+            }
+        }
+        scope--;
+    }
     if (index == 0) {
         return std::string("[rbp]");
     } else if (index < 0) {
@@ -34,20 +45,22 @@ std::string Cgen::generate(ProgramNode& program) {
     return this->data.str() + this->assembly_.str();
 }
 
-void Cgen::visit(ProgramNode& p) {
+Type Cgen::visit(ProgramNode& p) {
     for (auto& functions : p.functions) {
         functions->accept(*this);
     }
+    return Type::Unknown;
 }
 
-void Cgen::visit(FunctionNode& p) {
+Type Cgen::visit(FunctionNode& p) {
     hasReturn = false;
     localIndex_.clear();
     operandIndex_.clear();
     firstIndex = -4;
     currentFunction = table_.findStringByIdx(p.nameIdx);
     if (currentFunction.compare("print") == 0) {
-        return emitPrint();
+        emitPrint();
+        return Type::Unknown;
     }
 
     std::size_t opCount = p.operands.size();
@@ -56,49 +69,56 @@ void Cgen::visit(FunctionNode& p) {
         operandIndex_[e->identIdx] = baseIdx;
         baseIdx -= 8;
         if (baseIdx <= 0) {
-            std::cout << "operand index maths seems to be wrong\n" << std::endl;
+            std::cout << "Cgen Error: operand index maths seems to be wrong\n" << std::endl;
+            exit(EXIT_FAILURE);
         }
     }
     emitLabel(currentFunction);
     emitPush(R_RBP);
     emitMov(R_RBP, R_RSP);
-    assembly_ << "sub rsp, " << align16((4 * p.localCount)) << "\n"; // fix for number of locals
+    assembly_ << "sub rsp, " << align16((8 * p.localCount)) << "\n"; // fix for number of locals
     emitMov(R_EAX, "0"); 
     p.statement->accept(*this);
     if (hasReturn == false) {
-        emitMov(R_RAX, 0);
+        emitMov(R_RAX, "0");
     }
     emitLabel(currentFunction + F_DONE);
     emitMov(R_RSP, R_RBP);
     emitPop(R_RBP);
     emitLine("ret");
-    std::cout << "done first func";
+    return Type::Unknown;
 }
 
-void Cgen::visit(OperandNode& op) {
-    emitPush(op.identIdx);
+Type Cgen::visit(OperandNode& op) {
+    return Type::Unknown;
 }
 
-void Cgen::visit(LetStatementNode& p) {
+Type Cgen::visit(LetStatementNode& p) {
     p.expr->accept(*this);
-    localIndex_[p.idx] = firstIndex;
-    firstIndex -= 4;
+    localIndex_[currentScope][p.idx] = firstIndex;
+    firstIndex -= 8;
     emitPop(R_RAX);
-    emitMov(getLocalLocation(p.idx), "eax");
+    emitMov(getLocalLocation(p.idx), R_RAX);
+    return Type::Unknown;
 }
 
-void Cgen::visit(BlockStatementNode& b) {
+Type Cgen::visit(BlockStatementNode& b) {
+    currentScope++;
     for (auto& stmt : b.statements) 
         stmt->accept(*this);
+    localIndex_[currentScope].clear();
+    currentScope--;
+    return Type::Unknown;
 }
 
-void Cgen::visit(ReassignStatementNode& s) {
+Type Cgen::visit(ReassignStatementNode& s) {
     s.expr->accept(*this);
     emitPop(R_RAX);
-    emitMov(getLocalLocation(s.idx), "eax");
+    emitMov(getLocalLocation(s.idx), R_RAX);
+    return Type::Unknown;
 }
 
-void Cgen::visit(ReturnStatementNode& s) {
+Type Cgen::visit(ReturnStatementNode& s) {
     hasReturn = true;
     s.expr->accept(*this);
     emitPop(R_RAX);
@@ -109,13 +129,16 @@ void Cgen::visit(ReturnStatementNode& s) {
     } else {
         emitLine("jmp " + currentFunction + F_DONE);
     }
+    return Type::Unknown;
 }
 
-void Cgen::visit(ExpressionStatementNode& s) {
+Type Cgen::visit(ExpressionStatementNode& s) {
     s.expr->accept(*this);
+    emitPop(R_RAX);
+    return Type::Unknown;
 }
 
-void Cgen::visit(BinaryExpressionNode& e) {
+Type Cgen::visit(BinaryExpressionNode& e) {
     e.l->accept(*this);
     e.r->accept(*this);
     emitPop(R_RBX);
@@ -128,9 +151,10 @@ void Cgen::visit(BinaryExpressionNode& e) {
         std::cerr << "Cgen Error: Error finding op for binary operation!\n";
     }
     emitPush(R_RAX);
+    return Type::Unknown;
 }
 
-void Cgen::visit(TermExpressionNode& e) {
+Type Cgen::visit(TermExpressionNode& e) {
     if (e.isIdent) {
         if (operandIndex_.find(e.value) != operandIndex_.end()) {
             emitPush(getOperandLocation(e.value));
@@ -138,24 +162,34 @@ void Cgen::visit(TermExpressionNode& e) {
             emitPush(getLocalLocation(e.value));
         }
     } else if (e.type == Type::String) {
-        data << "string_" << e.value << ":\n";
-        data << ".ascii \"" << table_.findStringByIdx(e.value) << "\"" << "\n";
-        data << "len_" << e.value << " = . - " << "string_" << e.value << "\n";
+        if (std::find(stringsEmitted.begin(), stringsEmitted.end(), e.value) == stringsEmitted.end()) {
+            data << "string_" << e.value << ":\n";
+            data << ".ascii \"" << table_.findStringByIdx(e.value) << "\"" << "\n";
+            data << "len_" << e.value << " = . - " << "string_" << e.value << "\n";
+            stringsEmitted.push_back(e.value);
+        }
         emitLine("lea rax, [rip + string_" + std::to_string(e.value) + "]");
-        emitPush(R_RAX);
-        emitMov(R_RAX, "len_" + std::to_string(e.value));
         emitPush(R_RAX);
     } else {
         emitPush(e.value);
     }
+    return Type::Unknown;
 }
 
-void Cgen::visit(CallExpressionNode& e) {
-    for (auto& e : e.operands) {
-        e->accept(*this); // top of the stack
+Type Cgen::visit(CallExpressionNode& e) {
+    int argSlots = 0;
+    for (auto& op : e.operands) {
+        op->accept(*this); // top of the stack
+        if (op->type == Type::String) { // temp fix, proper fix later
+            argSlots++;
+        }
+        argSlots++;
     }
     emitCall(e.value);
+    if (argSlots > 0)
+        emitLine("add rsp, " + std::to_string((8*argSlots)));
     emitPush(R_RAX);
+    return Type::Unknown;
 }
 
 void Cgen::emitPrint() {

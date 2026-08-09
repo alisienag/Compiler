@@ -2,11 +2,11 @@
 
 #include "ast.h"
 #include "stringtable.h"
+#include <unordered_map>
 
-
-class ScopeCheck : Visitor {
+class TypeCheck : public Visitor {
     public:
-    ScopeCheck(StringTable& table) : table_(table) {}
+    TypeCheck(StringTable table) : table_(table) {}
     Type visit(ProgramNode&) override;
     Type visit(FunctionNode&) override;
     Type visit(OperandNode&) override;
@@ -20,11 +20,11 @@ class ScopeCheck : Visitor {
     Type visit(BinaryExpressionNode&) override;
     Type visit(TermExpressionNode&) override;
     Type visit(CallExpressionNode&) override;
-    private:
-    std::vector<std::vector<int>> scopes_;
-    unsigned int initCounter_;
-    StringTable table_;
 
-    bool existsInCurrentScope(int idx);
-    bool existsAtAll(int idx);
+    unsigned int errors;
+    private:
+    StringTable table_;
+    std::unordered_map<int, Type> varType;
+    std::unordered_map<int, Type> funcType;
+    std::unordered_map<int, std::vector<Type>> funcOpCount;
 };

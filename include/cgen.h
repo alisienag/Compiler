@@ -25,26 +25,28 @@ class Cgen : public Visitor {
         Cgen(StringTable table);
         std::string generate(ProgramNode& program);
 
-        void visit(ProgramNode&) override;
-        void visit(FunctionNode&) override;
-        void visit(OperandNode&) override;
+        Type visit(ProgramNode&) override;
+        Type visit(FunctionNode&) override;
+        Type visit(OperandNode&) override;
 
-        void visit(LetStatementNode&) override;
-        void visit(BlockStatementNode&) override;
-        void visit(ReassignStatementNode&) override;
-        void visit(ReturnStatementNode&) override;
+        Type visit(LetStatementNode&) override;
+        Type visit(BlockStatementNode&) override;
+        Type visit(ReassignStatementNode&) override;
+        Type visit(ReturnStatementNode&) override;
 
-        void visit(ExpressionStatementNode&) override;
+        Type visit(ExpressionStatementNode&) override;
 
-        void visit(BinaryExpressionNode&) override;
-        void visit(TermExpressionNode&) override;
-        void visit(CallExpressionNode&) override;
+        Type visit(BinaryExpressionNode&) override;
+        Type visit(TermExpressionNode&) override;
+        Type visit(CallExpressionNode&) override;
     private:
         std::stringstream assembly_;
         std::stringstream data;
         StringTable table_;
-        std::unordered_map<int, int> localIndex_;
+        std::unordered_map<int, std::unordered_map<int, int>> localIndex_;
+        int currentScope = 0;
         std::unordered_map<int, int> operandIndex_;
+        std::vector<int> stringsEmitted;
         int firstIndex = 0;
         
         std::string currentFunction;

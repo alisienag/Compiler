@@ -14,6 +14,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/alisiena/Projects/Compiler/src/parser.cpp" "CMakeFiles/Compiler.dir/src/parser.cpp.o" "gcc" "CMakeFiles/Compiler.dir/src/parser.cpp.o.d"
   "/home/alisiena/Projects/Compiler/src/scopecheck.cpp" "CMakeFiles/Compiler.dir/src/scopecheck.cpp.o" "gcc" "CMakeFiles/Compiler.dir/src/scopecheck.cpp.o.d"
   "/home/alisiena/Projects/Compiler/src/stringtable.cpp" "CMakeFiles/Compiler.dir/src/stringtable.cpp.o" "gcc" "CMakeFiles/Compiler.dir/src/stringtable.cpp.o.d"
+  "/home/alisiena/Projects/Compiler/src/typecheck.cpp" "CMakeFiles/Compiler.dir/src/typecheck.cpp.o" "gcc" "CMakeFiles/Compiler.dir/src/typecheck.cpp.o.d"
   "" "Compiler" "gcc" "CMakeFiles/Compiler.dir/link.d"
   )
 

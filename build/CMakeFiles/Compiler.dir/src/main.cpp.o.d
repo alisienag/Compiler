@@ -174,4 +174,5 @@ CMakeFiles/Compiler.dir/src/main.cpp.o: \
  /usr/include/c++/16/bits/hashtable_policy.h \
  /usr/include/c++/16/bits/enable_special_members.h \
  /usr/include/c++/16/bits/node_handle.h \
- /home/alisiena/Projects/Compiler/include/scopecheck.h
+ /home/alisiena/Projects/Compiler/include/scopecheck.h \
+ /home/alisiena/Projects/Compiler/include/typecheck.h

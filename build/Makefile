@@ -273,6 +273,30 @@ src/stringtable.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/src/stringtable.cpp.s
 .PHONY : src/stringtable.cpp.s
 
+src/typecheck.o: src/typecheck.cpp.o
+.PHONY : src/typecheck.o
+
+# target to build an object file
+src/typecheck.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/src/typecheck.cpp.o
+.PHONY : src/typecheck.cpp.o
+
+src/typecheck.i: src/typecheck.cpp.i
+.PHONY : src/typecheck.i
+
+# target to preprocess a source file
+src/typecheck.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/src/typecheck.cpp.i
+.PHONY : src/typecheck.cpp.i
+
+src/typecheck.s: src/typecheck.cpp.s
+.PHONY : src/typecheck.s
+
+# target to generate assembly for a file
+src/typecheck.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/src/typecheck.cpp.s
+.PHONY : src/typecheck.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -300,6 +324,9 @@ help:
 	@echo "... src/stringtable.o"
 	@echo "... src/stringtable.i"
 	@echo "... src/stringtable.s"
+	@echo "... src/typecheck.o"
+	@echo "... src/typecheck.i"
+	@echo "... src/typecheck.s"
 .PHONY : help
 
 

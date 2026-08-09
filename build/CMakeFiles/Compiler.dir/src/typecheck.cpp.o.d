@@ -1,6 +1,7 @@
-CMakeFiles/Compiler.dir/src/cgen.cpp.o: \
- /home/alisiena/Projects/Compiler/src/cgen.cpp /usr/include/stdc-predef.h \
- /home/alisiena/Projects/Compiler/include/cgen.h \
+CMakeFiles/Compiler.dir/src/typecheck.cpp.o: \
+ /home/alisiena/Projects/Compiler/src/typecheck.cpp \
+ /usr/include/stdc-predef.h \
+ /home/alisiena/Projects/Compiler/include/typecheck.h \
  /home/alisiena/Projects/Compiler/include/ast.h \
  /usr/include/c++/16/memory /usr/include/c++/16/bits/memoryfwd.h \
  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++config.h \
@@ -136,9 +137,15 @@ CMakeFiles/Compiler.dir/src/cgen.cpp.o: \
  /usr/include/linux/errno.h /usr/include/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
  /usr/include/bits/types/error_t.h /usr/include/c++/16/bits/charconv.h \
- /usr/include/c++/16/bits/basic_string.tcc /usr/include/c++/16/sstream \
- /usr/include/c++/16/istream /usr/include/c++/16/ios \
- /usr/include/c++/16/bits/ios_base.h \
+ /usr/include/c++/16/bits/basic_string.tcc \
+ /usr/include/c++/16/unordered_map \
+ /usr/include/c++/16/bits/unordered_map.h \
+ /usr/include/c++/16/bits/hashtable.h \
+ /usr/include/c++/16/bits/hashtable_policy.h \
+ /usr/include/c++/16/bits/enable_special_members.h \
+ /usr/include/c++/16/bits/node_handle.h /usr/include/c++/16/iostream \
+ /usr/include/c++/16/ostream /usr/include/c++/16/bits/ostream.h \
+ /usr/include/c++/16/ios /usr/include/c++/16/bits/ios_base.h \
  /usr/include/c++/16/bits/locale_classes.h \
  /usr/include/c++/16/bits/functexcept.h \
  /usr/include/c++/16/bits/locale_classes.tcc \
@@ -154,19 +161,7 @@ CMakeFiles/Compiler.dir/src/cgen.cpp.o: \
  /usr/include/c++/16/bits/streambuf_iterator.h \
  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/ctype_inline.h \
  /usr/include/c++/16/bits/locale_facets.tcc \
- /usr/include/c++/16/bits/basic_ios.tcc /usr/include/c++/16/ostream \
- /usr/include/c++/16/bits/ostream.h \
+ /usr/include/c++/16/bits/basic_ios.tcc \
  /usr/include/c++/16/bits/ostream_print.h \
- /usr/include/c++/16/bits/ostream.tcc \
- /usr/include/c++/16/bits/istream.tcc \
- /usr/include/c++/16/bits/sstream.tcc /usr/include/c++/16/unordered_map \
- /usr/include/c++/16/bits/unordered_map.h \
- /usr/include/c++/16/bits/hashtable.h \
- /usr/include/c++/16/bits/hashtable_policy.h \
- /usr/include/c++/16/bits/enable_special_members.h \
- /usr/include/c++/16/bits/node_handle.h /usr/include/c++/16/iostream \
- /usr/include/c++/16/algorithm /usr/include/c++/16/bits/stl_algo.h \
- /usr/include/c++/16/bits/algorithmfwd.h \
- /usr/include/c++/16/bits/stl_heap.h \
- /usr/include/c++/16/bits/uniform_int_dist.h \
- /usr/include/c++/16/pstl/glue_algorithm_defs.h
+ /usr/include/c++/16/bits/ostream.tcc /usr/include/c++/16/istream \
+ /usr/include/c++/16/bits/istream.tcc

@@ -11,7 +11,7 @@ Parser::Parser(std::vector<Token> tokens, StringTable table) : tokens_(std::move
 
 ProgramNode Parser::parse() {
     ProgramNode program;
-    std::unique_ptr<ExpressionStatementNode> stmt = std::make_unique<ExpressionStatementNode>(std::make_unique<TermExpressionNode>(1, false));
+    std::unique_ptr<ExpressionStatementNode> stmt = std::make_unique<ExpressionStatementNode>(std::make_unique<TermExpressionNode>(1, false, Type::i32));
         
     std::unique_ptr<OperandNode> op = std::make_unique<OperandNode>(table_.addString("input"), Type::String);
     std::unique_ptr<OperandNode> op2 = std::make_unique<OperandNode>(table_.addString("length"), Type::i32);
@@ -119,20 +119,19 @@ std::unique_ptr<ExpressionNode> Parser::expression() {
 std::unique_ptr<TermExpressionNode> Parser::termExpression() {
     if (check(TokenType::Number)) {
         Token tok = expect(TokenType::Number, "number or identifier");
-        return std::make_unique<TermExpressionNode>(tok.value, false);
+        return std::make_unique<TermExpressionNode>(tok.value, false, Type::i32);
     }
     if (check(TokenType::Identifier)) {
         Token tok = expect(TokenType::Identifier, "number or identifier");
         if (check(TokenType::LParen)) {
             return callExpression(tok);
         }
-        return std::make_unique<TermExpressionNode>(tok.value, true);
+        return std::make_unique<TermExpressionNode>(tok.value, true, Type::Unknown);
     }
     if (check(TokenType::Speech)) {
         expect(TokenType::Speech, "\"");
-        std::cout << "expecting string";
         Token str = expect(TokenType::String, "string literal");
-        std::unique_ptr<TermExpressionNode> expr = std::make_unique<TermExpressionNode>(str.value, false);
+        std::unique_ptr<TermExpressionNode> expr = std::make_unique<TermExpressionNode>(str.value, false, Type::String);
         expr->type = Type::String;
         expect(TokenType::Speech, "\"");
         return expr;
@@ -150,7 +149,7 @@ std::unique_ptr<CallExpressionNode> Parser::callExpression(const Token& tok) {
             operands.push_back(termExpression());
     }
     expect(TokenType::RParen, ")");
-    return std::make_unique<CallExpressionNode>(tok.value, true, std::move(operands));
+    return std::make_unique<CallExpressionNode>(tok.value, true, std::move(operands), Type::Unknown);
 }
 
 // Helpers
@@ -186,7 +185,7 @@ bool Parser::match(TokenType t) {
 const Token& Parser::expect(TokenType type, const char* what) {
     if (check(type)) return advance();
     Token t = peek();
-    std::cout << "Parse Error: expected " << what << " at token: " << (int)t.type << " at line: " << t.line << std::endl;
+    std::cerr << "Parse Error: expected " << what << " at token: " << (int)t.type << " at line: " << t.line << std::endl;
     exit(EXIT_FAILURE);
 }
 
