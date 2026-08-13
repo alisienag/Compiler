@@ -4,25 +4,27 @@
 #include <iostream>
 
 Type ScopeCheck::visit(ProgramNode& p) {
-    scopes_.push_back(std::vector<int>());
+    this->rFuncs = p.rFunctions;
+    this->errors = 0;
+    enterScope();
     for (auto & funcs : p.functions)
         scopes_.back().push_back(funcs->nameIdx);
     for (auto& funcs : p.functions) {
         funcs->accept(*this);
     }
-    return Type::Unknown;
+    return Type::Void();
 }
 Type ScopeCheck::visit(FunctionNode& p) {
     initCounter_ = 0;
-    scopes_.push_back({});
+    enterScope();
     scopes_.back().push_back(p.nameIdx);
     for (auto& op : p.operands) {
         op->accept(*this);
     }
     p.statement->accept(*this);
-    scopes_.pop_back();
+    exitScope();
     p.localCount = initCounter_;
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type ScopeCheck::visit(OperandNode& o) {
@@ -31,7 +33,7 @@ Type ScopeCheck::visit(OperandNode& o) {
         errors++;
     }
     scopes_.back().push_back(o.identIdx);
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type ScopeCheck::visit(LetStatementNode& s) {
@@ -41,36 +43,47 @@ Type ScopeCheck::visit(LetStatementNode& s) {
         errors++;
     } else {
         scopes_.back().push_back(currentIdx);
+        if (s.isConst) {
+            const_.back().push_back(currentIdx);
+        }
         initCounter_++;
     }
-    return Type::Unknown;
+    return Type::Void();
 }
 Type ScopeCheck::visit(BlockStatementNode& s) {
-    scopes_.push_back(std::vector<int>());
+    enterScope();
     for (auto& stmt : s.statements) {
         stmt->accept(*this);
     }
-    scopes_.pop_back();
-    return Type::Unknown;
+    exitScope();
+    return Type::Void();
 }
 
 Type ScopeCheck::visit(ReassignStatementNode& s) {
-    if (!existsAtAll(s.idx)) {
-        std::cerr << "ScopeCheck: identifier " << table_.findStringByIdx(s.idx) << " not defined to reassign!\n";
+    int scopeLayer = existsAtAll(this->scopes_, s.lhs->value);
+    if (scopeLayer == 0) {
+        std::cerr << "ScopeCheck: identifier " << table_.findStringByIdx(s.lhs->value) << " not defined to reassign!\n";
         errors++;
     }
+    int constLayer = existsAtAll(this->const_, s.lhs->value);
+    if (constLayer) {
+        if (constLayer >= scopeLayer) {
+            std::cerr << "ScopeCheck: identifier " << table_.findStringByIdx(s.lhs->value) << " is declared const and can't be reassigned!!\n";
+            errors++;
+        }
+    }
     s.expr->accept(*this);
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type ScopeCheck::visit(ReturnStatementNode& s) {
     s.expr->accept(*this);
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type ScopeCheck::visit(ExpressionStatementNode& s) {
     s.expr->accept(*this);
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type ScopeCheck::visit(IfStatementNode& s) {
@@ -83,47 +96,43 @@ Type ScopeCheck::visit(IfStatementNode& s) {
         s.elseNode->accept(*this);
         scopes_.pop_back();
     }
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type ScopeCheck::visit(BinaryExpressionNode& e) {
     e.l->accept(*this);
     e.r->accept(*this);
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type ScopeCheck::visit(TermExpressionNode& e) {
     if (e.isIdent) {
-        if (!existsAtAll(e.value)) {
+        if (existsAtAll(this->scopes_, e.value) == 0) {
             std::cerr << "ScopeCheck Error: identifier " << table_.findStringByIdx(e.value) << " not defined to use!\n";
             errors++;
         }
     }
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type ScopeCheck::visit(CallExpressionNode& e) {
-    if (!existsAtAll(e.value)) {
+    if (existsAtAll(this->scopes_, e.value) == 0) {
+        if (isRuntimeFunc(table_.findStringByIdx(e.value))) {
+            return Type::Void();
+        }
         std::cerr << "ScopeCheck Error: cannot find function " << e.value << "\n";
         errors++;
     }
-    return Type::Unknown;
+    return Type::Void();
 }
 
-bool ScopeCheck::existsInCurrentScope(int idx) {
-    if (std::find(scopes_.back().begin(), scopes_.back().end(), idx) != scopes_.back().end()) {
-        return true;
-    } else {
-        return false;
-    }
-
+Type ScopeCheck::visit(CastExpressionNode& e) {
+    e.expr->accept(*this);
+    return Type::Void();
 }
 
-bool ScopeCheck::existsAtAll(int idx) {
-    for (auto& v : this->scopes_) {
-        if (std::find(v.begin(), v.end(), idx) != v.end()) {
-            return true;
-        }
-    }
-    return false;
+Type ScopeCheck::visit(IndexExpressionNode& e) {
+    e.primaryExpr->accept(*this);
+    e.indexExpr->accept(*this);
+    return Type::Void();
 }

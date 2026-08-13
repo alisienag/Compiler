@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include "parser.h"
+#include "runtime.h"
 #include "token.h"
 #include <iostream>
 #include <fstream>
@@ -22,6 +23,9 @@ int main(int argc, const char** argv) {
     std::cout << "Printing...\n";
     Printer printer;
     printer.print(program);
+
+    std::cout << "Hooking Runtime...\n";
+    Runtime::implement(program);
     
     std::cout << "ScopeChecking...\n";
     ScopeCheck scopeCheck(lexer.stringtable_);

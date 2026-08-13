@@ -22,7 +22,7 @@ std::string Cgen::getLocalLocation(int idx) {
     } else if (index < 0) {
         return std::string("[rbp" + std::to_string(index) + "]");
     } else {
-        std::cerr << "Cgen Error: Error calculating local index!\n" << std::endl;
+        std::cerr << "Cgen Error: Error calculating local index! got " << index << "\n" << std::endl;
         exit(EXIT_FAILURE);
     }
 }
@@ -46,22 +46,20 @@ std::string Cgen::generate(ProgramNode& program) {
 }
 
 Type Cgen::visit(ProgramNode& p) {
+    this->rFuncs = p.rFunctions;
     for (auto& functions : p.functions) {
         functions->accept(*this);
     }
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type Cgen::visit(FunctionNode& p) {
     hasReturn = false;
     localIndex_.clear();
     operandIndex_.clear();
+    isConst_.clear();
     firstIndex = -4;
     currentFunction = table_.findStringByIdx(p.nameIdx);
-    if (currentFunction.compare("print") == 0) {
-        emitPrint();
-        return Type::Unknown;
-    }
     std::size_t opCount = p.operands.size();
     int baseIdx = (8 * opCount) + 8; // for first
     for (auto& e : p.operands) {
@@ -76,7 +74,7 @@ Type Cgen::visit(FunctionNode& p) {
     emitPush(R_RBP);
     emitMov(R_RBP, R_RSP);
     assembly_ << "sub rsp, " << align16((8 * p.localCount)) << "\n"; // fix for number of locals
-    emitMov(R_EAX, "0"); 
+    emitMov(R_RAX, "0"); 
     p.statement->accept(*this);
     if (hasReturn == false) {
         emitMov(R_RAX, "0");
@@ -85,20 +83,21 @@ Type Cgen::visit(FunctionNode& p) {
     emitMov(R_RSP, R_RBP);
     emitPop(R_RBP);
     emitLine("ret");
-    return Type::Unknown;
+    return Type::Void();
 }
 
-Type Cgen::visit(OperandNode& op) {
-    return Type::Unknown;
+Type Cgen::visit(OperandNode&) {
+    return Type::Void();
 }
 
 Type Cgen::visit(LetStatementNode& p) {
     p.expr->accept(*this);
     localIndex_[currentScope][p.idx] = firstIndex;
+    isConst_[currentScope][p.idx] = p.isConst;
     firstIndex -= 8;
     emitPop(R_RAX);
     emitMov(getLocalLocation(p.idx), R_RAX);
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type Cgen::visit(BlockStatementNode& b) {
@@ -106,15 +105,29 @@ Type Cgen::visit(BlockStatementNode& b) {
     for (auto& stmt : b.statements) 
         stmt->accept(*this);
     localIndex_[currentScope].clear();
+    isConst_[currentScope].clear();
     currentScope--;
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type Cgen::visit(ReassignStatementNode& s) {
     s.expr->accept(*this);
     emitPop(R_RAX);
-    emitMov(getLocalLocation(s.idx), R_RAX);
-    return Type::Unknown;
+    if (auto* idx = dynamic_cast<IndexExpressionNode*>(s.lhs.get())) {
+        emitPush(R_RAX);
+        idx->indexExpr->accept(*this);
+        idx->primaryExpr->accept(*this);
+        emitPop(R_RBX);
+        emitPop(R_RCX);
+        int stride = typeSize(*idx->primaryExpr->type.element);
+        emitLine("imul rcx, " + std::to_string(stride));
+        emitLine("add rbx, rcx");
+        emitPop(R_RAX);
+        emitMov("[rbx]", R_RAX);
+    } else {
+        emitMov(getLocalLocation(s.lhs->value), R_RAX);
+    }
+    return Type::Void();
 }
 
 Type Cgen::visit(ReturnStatementNode& s) {
@@ -128,13 +141,12 @@ Type Cgen::visit(ReturnStatementNode& s) {
     } else {
         emitLine("jmp " + currentFunction + F_DONE);
     }
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type Cgen::visit(ExpressionStatementNode& s) {
     s.expr->accept(*this);
-    emitPop(R_RAX);
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type Cgen::visit(IfStatementNode& s) {
@@ -152,7 +164,7 @@ Type Cgen::visit(IfStatementNode& s) {
     }
     emitLabel(else_end);
     
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type Cgen::visit(BinaryExpressionNode& e) {
@@ -172,7 +184,7 @@ Type Cgen::visit(BinaryExpressionNode& e) {
         std::cerr << "Cgen Error: Error finding op for binary operation!\n";
     }
     emitPush(R_RAX);
-    return Type::Unknown;
+    return Type::Void();
 }
 
 Type Cgen::visit(TermExpressionNode& e) {
@@ -182,7 +194,9 @@ Type Cgen::visit(TermExpressionNode& e) {
         } else {
             emitPush(getLocalLocation(e.value));
         }
-    } else if (e.type == Type::String) {
+        return Type::Void();
+    }
+    if (e.type.type == TypeKind::Array && e.type.element->type == TypeKind::u8 && e.isConst == true) {
         if (std::find(stringsEmitted.begin(), stringsEmitted.end(), e.value) == stringsEmitted.end()) {
             data << "string_" << e.value << ":\n";
             data << ".ascii \"" << table_.findStringByIdx(e.value) << "\"" << "\n";
@@ -191,21 +205,18 @@ Type Cgen::visit(TermExpressionNode& e) {
         }
         emitLine("lea rax, [rip + string_" + std::to_string(e.value) + "]");
         emitPush(R_RAX);
-    } else {
-        emitPush(e.value);
+        return Type::Void();
     }
-    return Type::Unknown;
+
+    emitPush(e.value);
+    
+    return Type::Void();
 }
 
 Type Cgen::visit(CallExpressionNode& e) {
     int stackSlots = 0;
     for (std::size_t i = 0; i < e.operands.size(); i++) {
-        const std::unique_ptr<ExpressionNode>& term = e.operands.at(i);
-        if (term->inferredType == Type::i32 || term->inferredType == Type::String) {
-            stackSlots += 1;
-        } else {
-            // Handle future types, structs etc
-        }
+        stackSlots++; // For now, all operands take 8 bytes of space
     }
     int padding = ((stackDepth + stackSlots) % 2 == 0 ? 0 : 1);
     if (padding) {
@@ -227,20 +238,41 @@ Type Cgen::visit(CallExpressionNode& e) {
         stackDepth -= cleanUp;
     }
     emitPush(R_RAX);
-    return Type::Unknown;
+    return Type::Void();
 }
 
-void Cgen::emitPrint() {
-    emitLabel("_print");
-    emitPush(R_RBP);
-    emitMov(R_RBP, R_RSP);
-    emitMov(R_RAX, "1");
-    emitMov(R_RDI, "1");
-    emitMov(R_RSI, "[rbp+24]");
-    emitMov(R_RDX, "[rbp+16]");
-    emitLine("syscall");
-    emitMov(R_RAX, "0");
-    emitMov(R_RSP, R_RBP);
-    emitPop(R_RBP);
-    emitLine("ret");
+Type Cgen::visit(CastExpressionNode& e) {
+    e.expr->accept(*this);
+    emitPop(R_RAX);
+    switch(e.type.type) {
+        case TypeKind::u8:
+            emitLine("movzx rax, al");
+            break;
+        case TypeKind::i32:
+            emitLine("movsx rax, eax");
+            break;
+        case TypeKind::i64:
+            //already i64;
+            break;
+        case TypeKind::Array:
+            //pointer to pointer cast nothing needed
+            break;
+        default:
+            break;
+    }
+    emitPush(R_RAX);
+    return Type::Void();
+}
+
+Type Cgen::visit(IndexExpressionNode& e) {
+    e.indexExpr->accept(*this);
+    e.primaryExpr->accept(*this);
+    emitPop(R_RBX);
+    emitPop(R_RCX);
+    int stride = typeSize(*e.primaryExpr->type.element);
+    emitLine("imul rcx, " + std::to_string(stride));
+    emitLine("add rbx, rcx");
+    emitMov(R_RAX, "[rbx]");
+    emitPush(R_RAX);
+    return Type::Void();
 }

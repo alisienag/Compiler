@@ -129,6 +129,10 @@ Token matchKeyword(const std::string& word) {
         token.type = TokenType::If;
     } else if (word.compare("else") == 0) {
         token.type = TokenType::Else;
+    } else if (word.compare("const") == 0) {
+        token.type = TokenType::Const;
+    } else if (word.compare("u8") == 0) {
+        token.type = TokenType::u8;
     }
     return token;
 }
@@ -184,6 +188,10 @@ Token matchSymbol(const char first, const char second) {
         if (second == '=') {
             token.type = TokenType::NEqual;
         }
+    } else if (first == '[') {
+        token.type = TokenType::LSquare;
+    } else if (first == ']') {
+        token.type = TokenType::RSquare;
     }
     return token;
 }
