@@ -225,6 +225,30 @@ src/parser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/src/parser.cpp.s
 .PHONY : src/parser.cpp.s
 
+src/runtime.o: src/runtime.cpp.o
+.PHONY : src/runtime.o
+
+# target to build an object file
+src/runtime.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/src/runtime.cpp.o
+.PHONY : src/runtime.cpp.o
+
+src/runtime.i: src/runtime.cpp.i
+.PHONY : src/runtime.i
+
+# target to preprocess a source file
+src/runtime.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/src/runtime.cpp.i
+.PHONY : src/runtime.cpp.i
+
+src/runtime.s: src/runtime.cpp.s
+.PHONY : src/runtime.s
+
+# target to generate assembly for a file
+src/runtime.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/src/runtime.cpp.s
+.PHONY : src/runtime.cpp.s
+
 src/scopecheck.o: src/scopecheck.cpp.o
 .PHONY : src/scopecheck.o
 
@@ -318,6 +342,9 @@ help:
 	@echo "... src/parser.o"
 	@echo "... src/parser.i"
 	@echo "... src/parser.s"
+	@echo "... src/runtime.o"
+	@echo "... src/runtime.i"
+	@echo "... src/runtime.s"
 	@echo "... src/scopecheck.o"
 	@echo "... src/scopecheck.i"
 	@echo "... src/scopecheck.s"

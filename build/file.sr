@@ -1,9 +1,5 @@
-add(i: i32, j: i32): i32 => ret i + j;
-
-start(): i32 => {
-    let ready: bool = add(1, 1) == 2;
-    if ready {
-        print("go\n", 3);
-    }
-    ret add(5, 10);
+start(): u8 => {
+    const i: [u8] = "hey";
+    let j: [u8] = [u8] <- i;
+    ret u8 <- malloc(16);
 }

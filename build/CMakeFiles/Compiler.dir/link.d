@@ -9,6 +9,7 @@ Compiler: \
   CMakeFiles/Compiler.dir/src/cgen.cpp.o \
   CMakeFiles/Compiler.dir/src/scopecheck.cpp.o \
   CMakeFiles/Compiler.dir/src/typecheck.cpp.o \
+  CMakeFiles/Compiler.dir/src/runtime.cpp.o \
   /usr/lib/gcc/x86_64-pc-linux-gnu/16/libstdc++.so \
   /usr/lib/gcc/x86_64-pc-linux-gnu/16/../../../../lib/libm.so \
   /usr/lib/gcc/x86_64-pc-linux-gnu/16/../../../../lib/libm.so \
@@ -60,6 +61,8 @@ CMakeFiles/Compiler.dir/src/cgen.cpp.o:
 CMakeFiles/Compiler.dir/src/scopecheck.cpp.o:
 
 CMakeFiles/Compiler.dir/src/typecheck.cpp.o:
+
+CMakeFiles/Compiler.dir/src/runtime.cpp.o:
 
 /usr/lib/gcc/x86_64-pc-linux-gnu/16/libstdc++.so:
 

@@ -109,7 +109,6 @@ CMakeFiles/Compiler.dir/src/cgen.cpp.o: \
  /usr/include/c++/16/bits/erase_if.h /usr/include/c++/16/bits/vector.tcc \
  /usr/include/c++/16/bits/memory_resource.h /usr/include/c++/16/cstddef \
  /usr/include/c++/16/bits/uses_allocator_args.h \
- /home/alisiena/Projects/Compiler/include/stringtable.h \
  /usr/include/c++/16/string /usr/include/c++/16/bits/char_traits.h \
  /usr/include/c++/16/bits/localefwd.h \
  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++locale.h \
@@ -136,9 +135,10 @@ CMakeFiles/Compiler.dir/src/cgen.cpp.o: \
  /usr/include/linux/errno.h /usr/include/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
  /usr/include/bits/types/error_t.h /usr/include/c++/16/bits/charconv.h \
- /usr/include/c++/16/bits/basic_string.tcc /usr/include/c++/16/sstream \
- /usr/include/c++/16/istream /usr/include/c++/16/ios \
- /usr/include/c++/16/bits/ios_base.h \
+ /usr/include/c++/16/bits/basic_string.tcc \
+ /home/alisiena/Projects/Compiler/include/stringtable.h \
+ /usr/include/c++/16/sstream /usr/include/c++/16/istream \
+ /usr/include/c++/16/ios /usr/include/c++/16/bits/ios_base.h \
  /usr/include/c++/16/bits/locale_classes.h \
  /usr/include/c++/16/bits/functexcept.h \
  /usr/include/c++/16/bits/locale_classes.tcc \

@@ -12,9 +12,11 @@ ifStatement -> 'if' expression blockStatement ('else' (blockStatement | ifStatem
 expressionStatement -> expression ';'
 
 expression -> comparison
+castExpression -> type '<''-' expression
 comparison -> additive ( ('==' | '!=' | '<' | '>' | '<=' | '>=') additive)?
 additive -> term ('+' term | '-' term)*
-term -> number | ident | callExpression | '"' str '"' | 'true' | 'false'
+term -> primary ( '[' expression ']')*
+primary -> number | ident | callExpression | '"' str '"' | 'true' | 'false'
 callExpression -> ident '(' ARGS? ')' 
 ARGS -> expression (',' expression)*
 
@@ -22,4 +24,4 @@ ARGS -> expression (',' expression)*
 
 number -> [0-9][0-9]*
 ident -> [a-z | A-Z]+[0-9]*
-type -> 'i32' | 'bool' | 'string'
+type -> 'i32' | 'bool' | 'string' | '[' type ']'

@@ -1,8 +1,0 @@
-hey: i32 => {
-    ret 2;
-}
-
-main: i32 => {
-    let i: i32 = hey();
-    ret i;
-}

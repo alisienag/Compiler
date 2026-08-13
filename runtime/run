@@ -1,0 +1,5 @@
+gcc -S -O2 -masm=intel -ffreestanding -nostdlib -fno-stack-protector -fno-pic -fno-pie runtime.c -o runtime_c.s
+
+gcc -c -O2 -ffreestanding -nostdlib -fno-stack-protector -fno-pic -fno-pie runtime.c -o runtime_c.o
+
+as runtime.s -o runtime_asm.o

@@ -8,6 +8,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/Compiler.dir/src/main.cpp.o.d"
   "CMakeFiles/Compiler.dir/src/parser.cpp.o"
   "CMakeFiles/Compiler.dir/src/parser.cpp.o.d"
+  "CMakeFiles/Compiler.dir/src/runtime.cpp.o"
+  "CMakeFiles/Compiler.dir/src/runtime.cpp.o.d"
   "CMakeFiles/Compiler.dir/src/scopecheck.cpp.o"
   "CMakeFiles/Compiler.dir/src/scopecheck.cpp.o.d"
   "CMakeFiles/Compiler.dir/src/stringtable.cpp.o"

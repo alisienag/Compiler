@@ -22,6 +22,7 @@ class Parser {
         
         const Token& expect(TokenType type, const char* what);
 
+        Type checkType();
         Type expectType();
         
         std::unique_ptr<FunctionNode> function();
@@ -38,6 +39,8 @@ class Parser {
         std::unique_ptr<ExpressionNode> comparisonExpression();
         std::unique_ptr<ExpressionNode> additiveExpression();
         std::unique_ptr<TermExpressionNode> termExpression();
+        std::unique_ptr<TermExpressionNode> primaryExpression();
         std::unique_ptr<BinaryExpressionNode> binaryExpression(std::unique_ptr<TermExpressionNode> l);
         std::unique_ptr<CallExpressionNode> callExpression(const Token& tok);
+        std::unique_ptr<CastExpressionNode> castExpression();
 };

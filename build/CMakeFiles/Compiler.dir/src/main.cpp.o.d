@@ -139,9 +139,11 @@ CMakeFiles/Compiler.dir/src/main.cpp.o: \
  /usr/include/c++/16/bits/atomic_lockfree_defines.h \
  /usr/include/c++/16/backward/auto_ptr.h \
  /usr/include/c++/16/pstl/glue_memory_defs.h \
- /usr/include/c++/16/pstl/execution_defs.h /usr/include/c++/16/iostream \
- /usr/include/c++/16/ostream /usr/include/c++/16/bits/ostream.h \
- /usr/include/c++/16/ios /usr/include/c++/16/bits/ios_base.h \
+ /usr/include/c++/16/pstl/execution_defs.h \
+ /home/alisiena/Projects/Compiler/include/runtime.h \
+ /usr/include/c++/16/iostream /usr/include/c++/16/ostream \
+ /usr/include/c++/16/bits/ostream.h /usr/include/c++/16/ios \
+ /usr/include/c++/16/bits/ios_base.h \
  /usr/include/c++/16/bits/locale_classes.h \
  /usr/include/c++/16/bits/functexcept.h \
  /usr/include/c++/16/bits/locale_classes.tcc \
@@ -175,4 +177,9 @@ CMakeFiles/Compiler.dir/src/main.cpp.o: \
  /usr/include/c++/16/bits/enable_special_members.h \
  /usr/include/c++/16/bits/node_handle.h \
  /home/alisiena/Projects/Compiler/include/scopecheck.h \
+ /usr/include/c++/16/algorithm /usr/include/c++/16/bits/stl_algo.h \
+ /usr/include/c++/16/bits/algorithmfwd.h \
+ /usr/include/c++/16/bits/stl_heap.h \
+ /usr/include/c++/16/bits/uniform_int_dist.h \
+ /usr/include/c++/16/pstl/glue_algorithm_defs.h \
  /home/alisiena/Projects/Compiler/include/typecheck.h

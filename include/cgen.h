@@ -16,6 +16,8 @@
 #define R_RBX "rbx"
 #define R_EBX "ebx"
 
+#define R_RCX "rcx"
+
 #define R_RDI "rdi"
 #define R_RSI "rsi"
 #define R_RDX "rdx"
@@ -43,17 +45,23 @@ class Cgen : public Visitor {
         Type visit(BinaryExpressionNode&) override;
         Type visit(TermExpressionNode&) override;
         Type visit(CallExpressionNode&) override;
+        Type visit(CastExpressionNode&) override;
+        Type visit(IndexExpressionNode&) override;
     private:
         std::stringstream assembly_;
         std::stringstream data;
+
         StringTable& table_;
+
         std::unordered_map<int, std::unordered_map<int, int>> localIndex_;
+        std::unordered_map<int, std::unordered_map<int, bool>> isConst_;
         int currentScope = 0;
+
         std::unordered_map<int, int> operandIndex_;
-        std::vector<int> stringsEmitted;
         int firstIndex = 0;
         int stackDepth = 0;
-        int labels_ = 0;
+
+        std::vector<int> stringsEmitted;
         
         std::string currentFunction;
         bool hasReturn = false;
@@ -63,6 +71,7 @@ class Cgen : public Visitor {
         void emitLine(const std::string& s) { assembly_ << "    " << s << "\n"; }
         void emitLabel(const std::string& s) { assembly_ << s << ":\n"; }
 
+        int labels_ = 0;
         std::string getFreshLabel() { return "label_" + std::to_string(labels_++); }
         
         void emitJmp(const std::string& label) { emitLine("jmp " + label); }

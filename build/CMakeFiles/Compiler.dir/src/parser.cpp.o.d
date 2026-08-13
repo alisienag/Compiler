@@ -110,7 +110,6 @@ CMakeFiles/Compiler.dir/src/parser.cpp.o: \
  /usr/include/c++/16/bits/erase_if.h /usr/include/c++/16/bits/vector.tcc \
  /usr/include/c++/16/bits/memory_resource.h /usr/include/c++/16/cstddef \
  /usr/include/c++/16/bits/uses_allocator_args.h \
- /home/alisiena/Projects/Compiler/include/stringtable.h \
  /usr/include/c++/16/string /usr/include/c++/16/bits/char_traits.h \
  /usr/include/c++/16/bits/localefwd.h \
  /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++locale.h \
@@ -138,6 +137,7 @@ CMakeFiles/Compiler.dir/src/parser.cpp.o: \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
  /usr/include/bits/types/error_t.h /usr/include/c++/16/bits/charconv.h \
  /usr/include/c++/16/bits/basic_string.tcc \
+ /home/alisiena/Projects/Compiler/include/stringtable.h \
  /home/alisiena/Projects/Compiler/include/token.h \
  /usr/include/c++/16/iostream /usr/include/c++/16/ostream \
  /usr/include/c++/16/bits/ostream.h /usr/include/c++/16/ios \

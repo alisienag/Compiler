@@ -1,1 +1,1 @@
-cmake .. ; make ; ./Compiler $1 ; as output.s -o output.o ; ld output.o -o prog ; ./prog ; echo $?
+cmake .. ; make ; ./Compiler $1 ; as output.s -o output.o ; ld output.o ../runtime/runtime_asm.o ../runtime/runtime_c.o -o prog ; ./prog ; echo $?

@@ -21,6 +21,8 @@ class TypeCheck : public Visitor {
     Type visit(BinaryExpressionNode&) override;
     Type visit(TermExpressionNode&) override;
     Type visit(CallExpressionNode&) override;
+    Type visit(CastExpressionNode&) override;
+    Type visit(IndexExpressionNode&) override;
 
     unsigned int errors;
     private:

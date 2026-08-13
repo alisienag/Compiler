@@ -40,5 +40,11 @@
   "command": "/usr/bin/c++  -I/home/alisiena/Projects/Compiler/include -g -std=c++17 -Wall -Wextra -pedantic -o CMakeFiles/Compiler.dir/src/typecheck.cpp.o -c /home/alisiena/Projects/Compiler/src/typecheck.cpp",
   "file": "/home/alisiena/Projects/Compiler/src/typecheck.cpp",
   "output": "CMakeFiles/Compiler.dir/src/typecheck.cpp.o"
+},
+{
+  "directory": "/home/alisiena/Projects/Compiler/build",
+  "command": "/usr/bin/c++  -I/home/alisiena/Projects/Compiler/include -g -std=c++17 -Wall -Wextra -pedantic -o CMakeFiles/Compiler.dir/src/runtime.cpp.o -c /home/alisiena/Projects/Compiler/src/runtime.cpp",
+  "file": "/home/alisiena/Projects/Compiler/src/runtime.cpp",
+  "output": "CMakeFiles/Compiler.dir/src/runtime.cpp.o"
 }
 ]
