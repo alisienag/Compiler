@@ -1,0 +1,36 @@
+# Build output
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# Compiler artefacts produced by running the compiler
+*.o
+*.s
+!runtime.s
+program
+a.out
+output.s
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+tags
+.cache/
+
+# Debug
+core
+core.*
+vgcore.*
+perf.data*

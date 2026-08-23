@@ -95,5 +95,5 @@
 	.comm	"heap_end",8,8
 	.local	"heap_ptr"
 	.comm	"heap_ptr",8,8
-	.ident	"GCC: (GNU) 16.1.1 20260728"
+	.ident	"GCC: (GNU) 16.2.1 20260810"
 	.section	.note.GNU-stack,"",@progbits

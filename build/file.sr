@@ -1,5 +1,0 @@
-start(): u8 => {
-    const i: [u8] = "hey";
-    let j: [u8] = [u8] <- i;
-    ret u8 <- malloc(16);
-}

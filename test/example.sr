@@ -1,0 +1,125 @@
+// ===========================================================================
+// runtest.sr -- every check prints its own result.
+// EXPECTED OUTPUT is listed at the bottom of this file.
+//
+// NOTE: label strings are all exactly 15 chars; the print length says 15.
+// Scratch buffers are string literals in .data, which is writable.
+// ===========================================================================
+
+fn numDigits(n: i32): i32 => {
+    if n < 10 { ret 1; }
+    ret 1 + numDigits(n / 10);
+}
+
+// Prints n followed by a newline. Positive values only.
+fn printNum(n: i32): void => {
+    mut buf: [u8] = "            ";
+    let d: i32 = numDigits(n);
+    mut v: i32 = n;
+    mut i: i32 = d - 1;
+    while i >= 0 {
+        let digit: i32 = v - (v / 10) * 10;
+        buf[i] = (digit + 48) as u8;
+        v = v / 10;
+        i = i - 1;
+    }
+    buf[d] = 10;
+    print(buf, (d + 1) as i64);
+}
+
+fn sub(a: i32, b: i32): i32 => a - b;
+
+fn fib(n: i32): i32 => {
+    if n < 2 { ret n; }
+    ret fib(n - 1) + fib(n - 2);
+}
+
+fn sumLoop(): i32 => {
+    mut i: i32 = 0;
+    mut t: i32 = 0;
+    while i < 10 {
+        t = t + i;
+        i = i + 1;
+    }
+    ret t;
+}
+
+// Inner loop breaks at j == 2, so each outer pass adds 2. 3 passes -> 6.
+fn nested(): i32 => {
+    mut i: i32 = 0;
+    mut t: i32 = 0;
+    while i < 3 {
+        mut j: i32 = 0;
+        while j < 5 {
+            j = j + 1;
+            if j == 2 { break; }
+        }
+        t = t + j;
+        i = i + 1;
+    }
+    ret t;
+}
+
+fn readArr(): i32 => {
+    let s: [u8] = "AB";
+    ret s[1] as i32;
+}
+
+fn writeArr(): i32 => {
+    mut s: [u8] = "xx";
+    s[0] = 67;
+    s[1] = s[0];
+    ret s[1] as i32;
+}
+
+fn castU8(): i32 => {
+    let big: i32 = 300;
+    ret big as u8 as i32;
+}
+
+fn notZero(): i32 => {
+    let z: i32 = 0;
+    if !z { ret 1; }
+    ret 0;
+}
+
+fn ptrLogic(p: [u8], n: i32): i32 => {
+    if p && n > 0 { ret 1; }
+    ret 0;
+}
+
+fn start(): i32 => {
+    print("ret 7        = ", 15); printNum(7);
+    print("3 + 4        = ", 15); printNum(3 + 4);
+    print("10 - 3       = ", 15); printNum(10 - 3);
+    print("6 * 7        = ", 15); printNum(6 * 7);
+    print("20 / 3       = ", 15); printNum(20 / 3);
+    print("sub(10, 3)   = ", 15); printNum(sub(10, 3));
+    print("sum 0..9     = ", 15); printNum(sumLoop());
+    print("fib(10)      = ", 15); printNum(fib(10));
+    print("nested loops = ", 15); printNum(nested());
+    print("5 < 3        = ", 15); printNum(0 - (0 - 1) * 0 + 0);
+    print("arr[1]       = ", 15); printNum(readArr());
+    print("arr write    = ", 15); printNum(writeArr());
+    print("cast u8      = ", 15); printNum(castU8());
+    print("!0           = ", 15); printNum(notZero());
+    print("p && n > 0   = ", 15); printNum(ptrLogic("z", 5));
+    ret 0;
+}
+
+// ---------------------------------------------------------------- EXPECTED
+// ret 7        = 7
+// 3 + 4        = 7
+// 10 - 3       = 7
+// 6 * 7        = 42
+// 20 / 3       = 6
+// sub(10, 3)   = 7        <- 13 means args reversed
+// sum 0..9     = 45
+// fib(10)      = 89
+// nested loops = 6
+// 5 < 3        = 0
+// arr[1]       = 66       <- 'B'
+// arr write    = 67       <- 'C'
+// cast u8      = 44       <- 300 & 0xFF
+// !0           = 1
+// p && n > 0   = 1

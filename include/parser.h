@@ -1,46 +1,66 @@
 #pragma once
-#include "ast.h"
-#include "stringtable.h"
-#include "token.h"
+
 #include <vector>
+#include <string>
+
+#include "token.h"
+#include "stringtable.h"
+#include "diagnostics.h"
+#include "ast.h"
 
 class Parser {
     public:
-        explicit Parser(std::vector<Token> tokens, StringTable& table);
-        ProgramNode parse();
+        Parser(std::vector<Token> tokens, StringTable& strings, Diagnostics& diags)
+            : toks_(std::move(tokens)), strings_(strings), diags_(diags) {}
+        std::unique_ptr<Program> parseProgram();
+        void listErrors() const;
     private:
-        std::vector<Token> tokens_;
-        std::size_t pos_;
-        StringTable& table_;
-        const Token& peek() const;
-        const Token& peek(int idx) const;
-        const Token& advance();
-
+        const Token& peek(int n = 0) const;
+        const Token& previous() const;
+        bool atEnd() const;
         bool check(TokenType t) const;
-        bool check(TokenType t, int idx) const;
         bool match(TokenType t);
+        const Token& advance();
+        const Token& expect(TokenType t, const char* what);
+
+        void fail(const Token& at, const std::string& msg);
+        void fix();
         
-        const Token& expect(TokenType type, const char* what);
-
-        Type checkType();
-        Type expectType();
+        Span spanFrom(size_t startIdx) const;
         
-        std::unique_ptr<FunctionNode> function();
-        std::unique_ptr<OperandNode> operand();
+        std::unique_ptr<FunctionDecl> parseFunction();
+        std::unique_ptr<Param> parseParam();
 
-        std::unique_ptr<StatementNode> statement();
-        std::unique_ptr<LetStatementNode> letStatement();
-        std::unique_ptr<BlockStatementNode> blockStatement();
-        std::unique_ptr<ReassignStatementNode> reassignStatement();
-        std::unique_ptr<ReturnStatementNode> returnStatement();
-        std::unique_ptr<IfStatementNode> ifStatement();
+        // Statements
 
-        std::unique_ptr<ExpressionNode> expression();
-        std::unique_ptr<ExpressionNode> comparisonExpression();
-        std::unique_ptr<ExpressionNode> additiveExpression();
-        std::unique_ptr<TermExpressionNode> termExpression();
-        std::unique_ptr<TermExpressionNode> primaryExpression();
-        std::unique_ptr<BinaryExpressionNode> binaryExpression(std::unique_ptr<TermExpressionNode> l);
-        std::unique_ptr<CallExpressionNode> callExpression(const Token& tok);
-        std::unique_ptr<CastExpressionNode> castExpression();
+        StmtPtr parseStatement();
+        StmtPtr parseLet();
+        StmtPtr parseReturn();
+        StmtPtr parseIf();
+        StmtPtr parseWhile();
+        std::unique_ptr<BlockStmt> parseBlock();
+        StmtPtr parseExprStatement();
+
+        // Expressions
+        ExprPtr parseExpression();
+        ExprPtr parseLogicalOr();
+        ExprPtr parseLogicalAnd();
+        ExprPtr parseComparison();
+        ExprPtr parseAdditive();
+        ExprPtr parseMultiplicative();
+        ExprPtr parseCast();
+        ExprPtr parseUnary();
+        ExprPtr parsePostfix();
+        std::vector<ExprPtr> parseArgs();
+        ExprPtr parsePrimary();
+
+        // Types
+        bool startsType(TokenType t) const;
+        Type parseType();
+
+        std::vector<Token> toks_;
+        StringTable& strings_;
+        Diagnostics& diags_;
+        size_t pos_ = 0;
+        unsigned int fix_ = 0;
 };

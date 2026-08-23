@@ -1,7 +1,8 @@
 #pragma once
 
 #include "ast.h"
+#include "stringtable.h"
 
 namespace Runtime {
-    void implement(ProgramNode& p);
+    void install(Program& p, StringTable& table);
 };

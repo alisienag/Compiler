@@ -2,13 +2,14 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 class StringTable {
     public:
     StringTable();
-    int addString(std::string);
-    std::string findStringByIdx(int);
-    const std::vector<std::string>& getVector() { return this->strings_; }
+    int addString(const std::string&);
+    const std::string& getName(int);
     private:
-    std::vector<std::string> strings_;
+    std::vector<std::string> names_;
+    std::unordered_map<std::string, int> map_;
 };

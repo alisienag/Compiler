@@ -10,6 +10,6 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-add_executable(Compiler src/main.cpp src/lexer.cpp src/parser.cpp src/stringtable.cpp src/cgen.cpp src/scopecheck.cpp src/typecheck.cpp src/runtime.cpp)
+add_executable(Compiler src/main.cpp src/lexer.cpp src/parser.cpp src/stringtable.cpp src/scopecheck.cpp src/typecheck.cpp src/codegenemitter.cpp src/codegen.cpp src/runtime.cpp)
 target_include_directories(Compiler PRIVATE include)
 target_compile_options(Compiler PRIVATE -Wall -Wextra -pedantic)

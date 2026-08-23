@@ -1,0 +1,129 @@
+// ===========================================================================
+// type_fail.sr -- 20 TYPE ERRORS, one per marked line.
+// Every name here is properly declared, so any SCOPE error reported is a bug.
+// Expected count: 20
+// ===========================================================================
+
+fn takesTwo(a: i32, b: i32): i32 => a + b;
+fn takesBool(b: bool): i32 => 1;
+fn returnsVoid(): void => { ret; }
+
+fn initMismatch(): i32 => {
+    // [1] bool initialiser for an i32 annotation
+    let a: i32 = true;
+    ret a;
+}
+
+fn initMismatchArray(): i32 => {
+    // [2] array initialiser for a scalar annotation
+    let a: i32 = "abc";
+    ret a;
+}
+
+fn condNotBool(n: i32): i32 => {
+    // [3] if condition must be bool, not i32
+    if n {
+        ret 1;
+    }
+    ret 0;
+}
+
+fn whileNotBool(n: i32): i32 => {
+    // [4] while condition must be bool
+    while n {
+        ret 1;
+    }
+    ret 0;
+}
+
+fn returnMismatch(): i32 => {
+    // [5] returning bool from an i32 function
+    ret true;
+}
+
+fn returnMissingValue(): i32 => {
+    // [6] bare ret in a non-void function
+    ret;
+}
+
+fn returnValueFromVoid(): void => {
+    // [7] returning a value from a void function
+    ret 1;
+}
+
+fn tooFewArgs(): i32 => {
+    // [8] takesTwo needs 2 arguments
+    ret takesTwo(1);
+}
+
+fn tooManyArgs(): i32 => {
+    // [9] takesTwo needs 2 arguments
+    ret takesTwo(1, 2, 3);
+}
+
+fn wrongArgType(): i32 => {
+    // [10] argument 1 is bool, parameter is i32
+    ret takesTwo(true, 2);
+}
+
+fn callNonFunction(): i32 => {
+    let x: i32 = 5;
+    // [11] x is not callable
+    ret x(1);
+}
+
+fn indexNonArray(): i32 => {
+    let x: i32 = 5;
+    // [12] cannot index a scalar
+    ret x[0];
+}
+
+fn indexNotInteger(): u8 => {
+    let s: [u8] = "abc";
+    // [13] index must be an integer, not bool
+    ret s[true];
+}
+
+fn arithOnBool(): i32 => {
+    let b: bool = true;
+    // [14] arithmetic on bool
+    ret b + 1;
+}
+
+fn arithOnArray(): i32 => {
+    let s: [u8] = "abc";
+    // [15] arithmetic on an array
+    ret s * 2;
+}
+
+fn compareMismatch(): bool => {
+    let n: i32 = 1;
+    let b: bool = true;
+    // [16] comparing i32 with bool
+    ret n < b;
+}
+
+fn logicalOnInt(): bool => {
+    let n: i32 = 1;
+    // [17] && needs bool operands
+    ret n && true;
+}
+
+fn notOnInt(): bool => {
+    let n: i32 = 1;
+    // [18] ! needs a bool operand
+    ret !n;
+}
+
+fn negateBool(): i32 => {
+    let b: bool = true;
+    // [19] unary - needs a numeric operand
+    ret 0 - (-b);
+}
+
+fn voidAsValue(): i32 => {
+    // [20] a void call has no value to bind
+    let a = returnsVoid();
+    ret 0;
+}
+

@@ -2,13 +2,14 @@
 
 #include "SymbolArena.h"
 #include "ast.h"
+#include "codegenemitter.h"
 #include "diagnostics.h"
 #include "stringtable.h"
 
-class TypeCheck : public Visitor {
+class CodeGen : public Visitor {
     public:
-    TypeCheck(StringTable& strings, SymbolArena& arena, Diagnostics& diags) :
-        strings_(strings), arena_(arena), diags_(diags) {}
+    CodeGen(StringTable& strings, SymbolArena& arena, Diagnostics& diags, CodeGenEmitter& emitter) :
+        strings_(strings), arena_(arena), diags_(diags), emitter_(emitter) {}
     virtual void visit(Program&) override;
     virtual void visit(FunctionDecl&) override;
     virtual void visit(Param&) override;
@@ -36,22 +37,18 @@ class TypeCheck : public Visitor {
     unsigned int errors;
     private:
 
-    Type expected_ = Type::unresolved();
-
-    void check(Expression& e, Type expect) {
-        Type saved = expected_;
-        this->expected_ = expect;
-        e.accept(*this);
-        expected_ = saved;
-    }
-
-    void infer(Expression& e) {
-        check(e, Type::unresolved());
-    }
+    unsigned int strLabels_ = 0;
+    unsigned int continueLabel_ = 0;
+    unsigned int breakLabel_ = 0;
+    void emitStore(const std::string& reg, unsigned int width);
+    void emitLoad(const std::string& reg, const Type& t);
+    void emitAddress(Expression& e);
 
     StringTable& strings_;
     SymbolArena& arena_;
     Diagnostics& diags_;
+    CodeGenEmitter& emitter_;
 
     FunctionDecl* currentFn_ = nullptr;
 };
+

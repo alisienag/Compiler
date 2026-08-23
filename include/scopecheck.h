@@ -1,70 +1,58 @@
 #pragma once
 
+#include "SymbolArena.h"
 #include "ast.h"
+#include "diagnostics.h"
 #include "stringtable.h"
-#include <algorithm>
 
-
-class ScopeCheck : Visitor {
+class ScopeCheck : public Visitor {
     public:
-    ScopeCheck(StringTable& table) : table_(table) {}
-    Type visit(ProgramNode&) override;
-    Type visit(FunctionNode&) override;
-    Type visit(OperandNode&) override;
+    ScopeCheck(StringTable& strings, SymbolArena& arena, Diagnostics& diags)
+        : strings_(strings), arena_(arena), diags_(diags) {}
+    virtual void visit(Program&) override;
+    virtual void visit(FunctionDecl&) override;
+    virtual void visit(Param&) override;
 
-    Type visit(LetStatementNode&) override;
-    Type visit(BlockStatementNode&) override;
-    Type visit(ReassignStatementNode&) override;
-    Type visit(ReturnStatementNode&) override;
-    Type visit(ExpressionStatementNode&) override;
-    Type visit(IfStatementNode&) override;
+    virtual void visit(LetStmt&) override;
+    virtual void visit(ExprStmt&) override;
+    virtual void visit(ReturnStmt&) override;
+    virtual void visit(IfStmt&) override;
+    virtual void visit(WhileStmt&) override;
+    virtual void visit(BreakStmt&) override;
+    virtual void visit(ContinueStmt&) override;
+    virtual void visit(BlockStmt&) override;
 
-    Type visit(BinaryExpressionNode&) override;
-    Type visit(TermExpressionNode&) override;
-    Type visit(CallExpressionNode&) override;
-    Type visit(CastExpressionNode&) override;
-    Type visit(IndexExpressionNode&) override;
-    
-    unsigned int errors;
+    virtual void visit(CallExpr&) override;
+    virtual void visit(IndexExpr&) override;
+    virtual void visit(CastExpr&) override;
+    virtual void visit(LogicalExpr&) override;
+    virtual void visit(BinaryExpr&) override;
+    virtual void visit(UnaryExpr&) override;
+    virtual void visit(NameExpr&) override;
+    virtual void visit(StringLiteral&) override;
+    virtual void visit(BoolLiteral&) override;
+    virtual void visit(IntLiteral&) override;
     private:
-    unsigned int initCounter_;
-    StringTable& table_;
-    std::vector<std::vector<int>> scopes_;
-    std::vector<std::vector<int>> const_;
-    void enterScope() {
-        scopes_.push_back(std::vector<int>());
-        const_.push_back(std::vector<int>());
-    }
-    void exitScope() {
-        scopes_.pop_back();
-        const_.pop_back();
-    }
-    void pushVariable(int idx, bool isConst) {
-        scopes_.back().push_back(idx);
-        if (isConst)
-            const_.back().push_back(idx);
-    }
+    using Scope = std::unordered_map<int, Symbol*>;
 
-    bool existsInCurrentScope(int idx) {
-        if (std::find(scopes_.back().begin(), scopes_.back().end(), idx) != scopes_.back().end()) {
-            return true;
-        } else {
-            return false;
-        }
+    void pushScope() { scopes_.emplace_back(); }
+    void popScope() { scopes_.pop_back(); }
 
-    }
+    Symbol* declare(int nameIdx, Type type, bool isMutable, Span at);
+    Symbol* lookup(int nameIdx) const;
+    void assignLocalSlot(Symbol& s);
+    void assignParamSlot(Symbol& s);
 
-    int existsAtAll(const std::vector<std::vector<int>>& vec, int idx) {
-        if (vec.size() == 0) { return 0; }
-        for (std::size_t i = vec.size()-1; i > 0; i--) {
-            auto& v = vec.at(i);
-            if (std::find(v.begin(), v.end(), idx) != v.end()) {
-                return i;
-            }
-        }
-        return 0;
-    }
+    static NameExpr* rootName(Expression* e);
 
+    StringTable& strings_;
+    SymbolArena& arena_;
+    Diagnostics& diags_;
 
-    bool isConst;
+    Scope globals_;
+    std::vector<Scope> scopes_;
+    FunctionDecl* currentFn_ = nullptr;
+    unsigned int localSlots_ = 0;
+    unsigned int paramSlots_ = 0;
+    int loopDepth_ = 0;
 };
