@@ -14,7 +14,7 @@ fn start(): i32 => { ret fib(10); }
 ```
 
 ```
-$ ./Compiler fib.sr && ./build.sh && ./program; echo $?
+$ ./run.sh fib.sr ;  echo $?
 55
 ```
 
@@ -81,11 +81,11 @@ The compiler emits `output.s`. Linking it needs the runtime:
 
 ```sh
 ./build/Compiler program.sr
-as output.s      -o output.o
-as runtime.s     -o runtime_asm.o
+as runtime/output.s      -o /runtime/output.o
+as runtime/runtime.s     -o /runtime/runtime_asm.o
 gcc -c -O2 -ffreestanding -nostdlib -fno-stack-protector -fno-pic -fno-pie \
-    runtime.c -o runtime_c.o
-ld output.o runtime_asm.o runtime_c.o -o program
+    runtime/runtime.c -o runtime/runtime_c.o
+ld runtime/output.o runtime/runtime_asm.o runtime/runtime_c.o -o program
 ./program
 ```
 
@@ -128,7 +128,7 @@ the backend.
 ./build/Compiler test/example.sr     # compiles and prints its own results
 ```
 
-`runtest.sr` is the end-to-end check: it computes arithmetic, recursion, loops,
+`example.sr` is the end-to-end check: it computes arithmetic, recursion, loops,
 array access, and casts, and prints each result with its expected value listed at
 the bottom of the file.
 
